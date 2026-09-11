@@ -40,6 +40,14 @@ RSpec.describe Elelem::Toolbox do
       result = subject.run("nonexistent", {})
       expect(result[:error]).to include("unknown tool")
     end
+
+    it "returns a failure result instead of crashing when a tool raises a LoadError" do
+      subject.add("broken", description: "Broken tool", params: {}, required: []) { require "nope/not/real" }
+
+      result = subject.run("broken", {})
+
+      expect(result[:error]).to include("nope/not/real")
+    end
   end
 
   describe "#tool_for" do

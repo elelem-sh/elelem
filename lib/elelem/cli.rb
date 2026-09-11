@@ -43,7 +43,7 @@ module Elelem
 
     def chat
       Elelem.start(provider: @provider)
-    rescue => e
+    rescue StandardError, ScriptError => e
       Elelem.logger.warn("cli: #{e.message}\n#{e.backtrace.join("\n")}")
       abort "elelem: #{e.message}"
     end
@@ -57,7 +57,7 @@ module Elelem
       reply = Elelem.ask(prompt, provider: @provider, output: output)
       abort "elelem: no reply" if reply.to_s.strip.empty?
       Elelem::Output.new.say(reply, as: :markdown) if piped
-    rescue => e
+    rescue StandardError, ScriptError => e
       Elelem.logger.warn("cli: #{e.message}\n#{e.backtrace.join("\n")}")
       abort "elelem: #{e.message}"
     end

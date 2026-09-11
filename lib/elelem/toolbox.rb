@@ -42,7 +42,7 @@ module Elelem
 
       result = dispatch(tool, args)
       result[:error] ? Result.failure(result) : Result.success(result)
-    rescue => e
+    rescue StandardError, ScriptError => e
       Elelem.logger.warn("toolbox: #{e.message}\n#{e.backtrace.join("\n")}")
       Result.failure(error: e.message, name: name, args: args)
     end

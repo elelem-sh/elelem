@@ -56,7 +56,7 @@ module Elelem
       parts = line.delete_prefix("/").split(" ", 2)
       name, args = parts[0], parts[1]
       commands.run(name, args) || output.say(commands.names.join(" "))
-    rescue => e
+    rescue StandardError, ScriptError => e
       Elelem.logger.warn("agent: #{e.message}")
       output.say(e.message, as: :error)
     end
@@ -86,7 +86,7 @@ module Elelem
       end
 
       [content, tool_calls]
-    rescue => e
+    rescue StandardError, ScriptError => e
       Elelem.logger.warn("agent: #{e.message}")
       output.say(e.message, as: :error)
       ["Error: #{e.message}", []]
