@@ -47,4 +47,16 @@ RSpec.describe Elelem::Plugins do
   ensure
     $plugins_spec_count = nil
   end
+
+  it "warns and continues when a plugin requires a missing gem" do
+    File.write(File.join(plugin_dir, "broken.rb"), 'require "nope/not/real"')
+
+    expect { plugins.load! }.to output(/failed to load plugin/).to_stderr
+  end
+
+  it "warns and continues when a plugin has a syntax error" do
+    File.write(File.join(plugin_dir, "broken.rb"), "def broken(")
+
+    expect { plugins.load! }.to output(/failed to load plugin/).to_stderr
+  end
 end

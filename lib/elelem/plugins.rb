@@ -21,7 +21,7 @@ module Elelem
 
         Dir["#{dir}/*.rb"].sort.each do |file|
           load(file)
-        rescue => e
+        rescue StandardError, ScriptError => e
           warn "elelem: failed to load plugin #{file}: #{e.message}"
         end
       end
