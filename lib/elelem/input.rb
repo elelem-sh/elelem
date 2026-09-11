@@ -23,9 +23,7 @@ module Elelem
     def complete(target, preposing)
       line = "#{preposing}#{target}"
 
-      if line.start_with?("/") && !preposing.include?(" ")
-        return command_names.select { |c| c.start_with?(line) }
-      end
+      return command_names.select { |c| c.start_with?(line) } if line.start_with?("/") && !preposing.include?(" ")
 
       if preposing.start_with?("/") && preposing.include?(" ")
         cmd_name = preposing.delete_prefix("/").split(" ", 2).first

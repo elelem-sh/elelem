@@ -41,7 +41,7 @@ module Elelem
         toolbox: toolbox,
         commands: commands,
         input: input || build_input(commands: commands),
-        output: output || build_output,
+        output: output || build_output
       )
       apply(agent)
       agent
@@ -49,19 +49,21 @@ module Elelem
 
     private
 
-    def build_input(**opts)
+    def build_input(**)
       @plugins.load!
-      (@registration.factories[:input] || ->(**o) { Input.new(**o) }).call(**opts)
+      (@registration.factories[:input] || ->(**o) { Input.new(**o) }).call(**)
     end
 
-    def build_output(**opts)
+    def build_output(**)
       @plugins.load!
-      (@registration.factories[:output] || ->(**o) { Output.new(**o) }).call(**opts)
+      (@registration.factories[:output] || ->(**o) { Output.new(**o) }).call(**)
     end
 
     def require_gem(name)
       require "elelem/#{name}"
-      @registration.providers.fetch(name.to_s) { raise "elelem-#{name} did not register a provider named #{name.inspect}" }
+      @registration.providers.fetch(name.to_s) do
+        raise "elelem-#{name} did not register a provider named #{name.inspect}"
+      end
     rescue LoadError
       raise "unknown provider: #{name.inspect}. Available: #{names.join(", ")}. Run: gem install elelem-#{name}"
     end

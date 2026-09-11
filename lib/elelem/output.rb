@@ -26,8 +26,7 @@ module Elelem
       say "#{state} \e[36m#{name}\e[0m(#{args})"
     end
 
-    def waiting
-    end
+    def waiting; end
 
     def display_file(path, fallback: nil)
       say(fallback || path)
@@ -38,9 +37,9 @@ module Elelem
     def render(text, as)
       case as
       when :error
-        return "error: #{text}"
+        "error: #{text}"
       when :markdown
-        "```\n" + text + "\n```\n"
+        "```\n#{text}\n```\n"
       else
         text
       end

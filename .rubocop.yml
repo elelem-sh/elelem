@@ -24,6 +24,25 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
+    - "*.gemspec"
+
+Style/GlobalVars:
+  Exclude:
+    - "spec/**/*"
+
+Lint/EmptyBlock:
+  Exclude:
+    - "spec/**/*"
+
+Lint/UselessDefaultValueArgument:
+  Enabled: false
+
+Lint/RedundantRequireStatement:
+  Enabled: false
+
+Lint/UnusedBlockArgument:
+  IgnoreEmptyBlocks: true
+  AllowUnusedKeywordArguments: true
 
 Style/Documentation:
   Enabled: false

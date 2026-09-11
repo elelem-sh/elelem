@@ -31,11 +31,11 @@ require_relative "elelem/version"
 
 module Elelem
   def self.start(provider: "stub", toolbox: Toolbox.new)
-    self.build(provider: provider, toolbox: toolbox).repl
+    build(provider: provider, toolbox: toolbox).repl
   end
 
   def self.ask(prompt, provider: "stub", toolbox: Toolbox.new, output: NullOutput.new)
-    self.build(provider: provider, toolbox: toolbox, input: NullInput.new, output: output).turn(prompt)
+    build(provider: provider, toolbox: toolbox, input: NullInput.new, output: output).turn(prompt)
   end
 
   def self.build(provider: "stub", toolbox: Toolbox.new, input: nil, output: nil)

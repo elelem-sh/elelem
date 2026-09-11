@@ -5,10 +5,10 @@ RSpec.describe Elelem::Registration do
 
   it "chains provider/setup/output/input registration" do
     result = registration
-      .provider(:test) { :client }
-      .setup(:probe) { |_agent| }
-      .output { :output }
-      .input { :input }
+             .provider(:test) { :client }
+             .setup(:probe) { |_agent| }
+             .output { :output }
+             .input { :input }
 
     expect(result).to equal(registration)
     expect(registration.providers.keys).to eq(["test"])

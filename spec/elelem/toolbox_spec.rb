@@ -5,17 +5,15 @@ RSpec.describe Elelem::Toolbox do
 
   before do
     subject.add("read",
-      description: "Read file",
-      params: { path: { type: "string" } },
-      required: ["path"],
-      aliases: ["open"]
-    ) { |a| { content: File.read(a["path"]) } }
+                description: "Read file",
+                params: { path: { type: "string" } },
+                required: ["path"],
+                aliases: ["open"]) { |a| { content: File.read(a["path"]) } }
 
     subject.add("write",
-      description: "Write file",
-      params: { path: { type: "string" }, content: { type: "string" } },
-      required: ["path", "content"]
-    ) { |a| { bytes: File.write(a["path"], a["content"]) } }
+                description: "Write file",
+                params: { path: { type: "string" }, content: { type: "string" } },
+                required: %w[path content]) { |a| { bytes: File.write(a["path"], a["content"]) } }
   end
 
   describe "#to_a" do
@@ -88,7 +86,7 @@ RSpec.describe Elelem::Toolbox do
       subject.before { |_args, tool_name:| tool_names << tool_name }
       subject.run("read", { "path" => __FILE__ })
       subject.run("write", { "path" => "/dev/null", "content" => "" })
-      expect(tool_names).to eq(["read", "write"])
+      expect(tool_names).to eq(%w[read write])
     end
 
     it "runs global after hooks with tool_name" do
@@ -103,7 +101,7 @@ RSpec.describe Elelem::Toolbox do
       subject.before { |_args, tool_name:| order << :global }
       subject.before("read") { |_args| order << :specific }
       subject.run("read", { "path" => __FILE__ })
-      expect(order).to eq([:global, :specific])
+      expect(order).to eq(%i[global specific])
     end
   end
 end

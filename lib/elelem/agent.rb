@@ -5,7 +5,8 @@ module Elelem
     attr_reader :conversation, :toolbox, :input, :output, :commands
     attr_accessor :provider
 
-    def initialize(provider, toolbox: Toolbox.new, input: NullInput.new, output: NullOutput.new, system_prompt: nil, commands: nil)
+    def initialize(provider, toolbox: Toolbox.new, input: NullInput.new, output: NullOutput.new, system_prompt: nil,
+                   commands: nil)
       @provider = provider
       @toolbox = toolbox
       @commands = commands || Commands.new
@@ -21,6 +22,7 @@ module Elelem
         line = input.ask("> ")
         break if line.nil?
         next if line.empty?
+
         line.start_with?("/") ? command(line) : turn(line)
       end
     end
@@ -54,7 +56,8 @@ module Elelem
 
     def command(line)
       parts = line.delete_prefix("/").split(" ", 2)
-      name, args = parts[0], parts[1]
+      name = parts[0]
+      args = parts[1]
       commands.run(name, args) || output.say(commands.names.join(" "))
     rescue StandardError, ScriptError => e
       Elelem.logger.warn("agent: #{e.message}")
@@ -62,7 +65,8 @@ module Elelem
     end
 
     def process(tool_call)
-      name, args = tool_call[:name], tool_call[:arguments]
+      name = tool_call[:name]
+      args = tool_call[:arguments]
       output.doing(toolbox.tool_for(name).name, args)
       Elelem.logger.debug("agent: #{name}(#{args.inspect})")
       result = toolbox.run(name.to_s, args)

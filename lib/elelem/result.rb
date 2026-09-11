@@ -5,6 +5,7 @@ require "forwardable"
 module Elelem
   class Result
     extend Forwardable
+
     def_delegators :@payload, :[], :each, :to_json, :to_h, :key?, :merge
 
     def self.success(payload)

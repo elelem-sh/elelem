@@ -19,7 +19,7 @@ module Elelem
         dir = File.expand_path(path)
         next unless File.directory?(dir)
 
-        Dir["#{dir}/*.rb"].sort.each do |file|
+        Dir["#{dir}/*.rb"].each do |file|
           load(file)
         rescue StandardError, ScriptError => e
           warn "elelem: failed to load plugin #{file}: #{e.message}"

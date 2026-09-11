@@ -11,7 +11,7 @@ module Elelem
     end
   end
 
-  def self.configure(&block)
-    Config.default.configure(&block)
+  def self.configure(&)
+    Config.default.configure(&)
   end
 end

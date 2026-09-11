@@ -18,7 +18,7 @@ module Elelem
 
     def completions_for(name, partial = "")
       cmd = command_for(name)
-      return [] unless cmd && cmd.completions
+      return [] unless cmd&.completions
 
       options = cmd.completions.respond_to?(:call) ? cmd.completions.call : cmd.completions
       options.select { |o| o.start_with?(partial) }

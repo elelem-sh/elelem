@@ -32,7 +32,10 @@ module Elelem
         o.separator "  help              Show this help"
         o.separator "\nOptions:"
         o.on("-p", "--provider NAME", "Provider to use (default: #{@provider})") { |p| @provider = p }
-        o.on("-h", "--help", "Show this help") { puts o; exit }
+        o.on("-h", "--help", "Show this help") do
+          puts o
+          exit
+        end
       end
       @parser.parse!(args)
     end
@@ -68,9 +71,10 @@ module Elelem
       files.each_with_index do |line, i|
         path = line.strip
         next if path.empty? || !File.file?(path)
-        puts %Q{<document index="#{i + 1}"><source>#{path}</source><document_content><![CDATA[#{File.read(path)}]]></document_content></document>}
+
+        puts %(<document index="#{i + 1}"><source>#{path}</source><document_content><![CDATA[#{File.read(path)}]]></document_content></document>)
       end
       puts "</documents>"
-     end
+    end
   end
 end

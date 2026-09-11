@@ -20,7 +20,10 @@ RSpec.describe Elelem::Commands do
       before do
         @called = false
         @args = {}
-        commands.register("example") { |args| @called = true; @args = args }
+        commands.register("example") do |args|
+          @called = true
+          @args = args
+        end
       end
 
       it "executes the command with args" do
@@ -32,14 +35,14 @@ RSpec.describe Elelem::Commands do
     end
 
     it "stores description" do
-      commands.register("test", description: "Test command") { }
+      commands.register("test", description: "Test command") {}
       expect(commands.names).to include("/test")
     end
   end
 
   describe "#run" do
     it "returns true when command exists" do
-      commands.register("test") { }
+      commands.register("test") {}
       expect(commands.run("test")).to be(true)
     end
 
@@ -50,16 +53,16 @@ RSpec.describe Elelem::Commands do
 
   describe "#names" do
     it "returns command names with slash prefix" do
-      commands.register("exit") { }
-      commands.register("help") { }
+      commands.register("exit") {}
+      commands.register("help") {}
       expect(commands.names).to contain_exactly("/exit", "/help")
     end
   end
 
   describe "#completions_for" do
     it "returns matching completions for a registered command" do
-      commands.register("raise", completions: ["heck", "help"]) { |args| raise args.inspect }
-      expect(commands.completions_for("raise", "he")).to match_array(["heck", "help"])
+      commands.register("raise", completions: %w[heck help]) { |args| raise args.inspect }
+      expect(commands.completions_for("raise", "he")).to match_array(%w[heck help])
     end
 
     it "returns an empty array for an unregistered command" do
