@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.0] - 2026-09-12
+
+### Changed
+- **Breaking:** `Agent` split into `Agent` (turn loop only), `Repl` (input
+  loop), `Session` (bundles agent+input+commands for setup blocks), and
+  `Transcript` (wraps `Conversation`+`SystemPrompt` rendering).
+- **Breaking:** `Tool` delegates JSON schema validation to a new `Schema`
+  class, reusable outside `Tool`.
+- **Breaking:** `Config.build_agent` renamed to `build_session`, returns a
+  `Session` instead of an `Agent`. `Registry#apply`/`#reload` now take a
+  `Session` instead of an `Agent`.
+- Rescue `ScriptError` (in addition to `StandardError`) when loading plugins,
+  so a plugin with a syntax error doesn't take down the whole process.
+- Load global `~/.agents/AGENTS.md` alongside the project's `AGENTS.md`.
+
 ## [0.11.0] - 2026-09-07
 
 ### Changed
