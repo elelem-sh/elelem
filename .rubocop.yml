@@ -14,9 +14,20 @@ Metrics/ModuleLength:
 
 Metrics/MethodLength:
   Max: 5
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
+Naming/PredicateMethod:
+  AllowedMethods:
+    - call
+    - run
 
 Metrics/ParameterLists:
   Max: 4
+  CountKeywordArgs: false
 
 Metrics/AbcSize:
   Max: 15

@@ -2,27 +2,22 @@
 
 module Elelem
   class Tool
-    attr_reader :name, :description, :params, :required, :aliases
+    attr_reader :name, :description, :aliases
 
-    def initialize(name, description:, params: {}, required: [], aliases: [], &fn)
+    def initialize(name, description:, schema: Schema.new, aliases: [], &handler)
       @name = name
       @description = description
-      @params = params.freeze
-      @required = required.freeze
+      @schema = schema
       @aliases = aliases.freeze
-      @fn = fn
-      @schema_hash = { type: "object", properties: @params, required: @required }.freeze
-      @schema = JSONSchemer.schema(@schema_hash)
+      @handler = handler
     end
 
     def call(args)
-      @fn.call(args)
+      @handler.call(args)
     end
 
     def validate(args)
-      @schema.validate(args || {}).map do |error|
-        error["error"]
-      end
+      @schema.validate(args)
     end
 
     def to_h
@@ -31,7 +26,7 @@ module Elelem
         function: {
           name: name,
           description: description,
-          parameters: @schema_hash
+          parameters: @schema.to_h
         }
       }
     end

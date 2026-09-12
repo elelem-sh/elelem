@@ -17,8 +17,9 @@ module Elelem
       @hooks[:after].clear
     end
 
-    def add(name, description:, params: {}, required: [], aliases: [], &fn)
-      tool = Tool.new(name, description: description, params: params, required: required, aliases: aliases, &fn)
+    def add(name, description:, params: {}, required: [], aliases: [], &handler)
+      schema = Schema.new(params: params, required: required)
+      tool = Tool.new(name, description: description, schema: schema, aliases: aliases, &handler)
       @tools[name] = tool
       tool.aliases.each { |a| @aliases[a] = name }
     end
@@ -37,14 +38,9 @@ module Elelem
 
     def run(name, args)
       tool = tool_for(name)
-      errors = tool.validate(args)
-      return Result.failure(error: errors.join(", ")) if errors.any?
-
-      result = dispatch(tool, args)
-      result[:error] ? Result.failure(result) : Result.success(result)
+      invalid(tool, args) || to_result(dispatch(tool, args))
     rescue StandardError, ScriptError => e
-      Elelem.logger.warn("toolbox: #{e.message}\n#{e.backtrace.join("\n")}")
-      Result.failure(error: e.message, name: name, args: args)
+      failure(name, args, e)
     end
 
     def to_a
@@ -53,13 +49,35 @@ module Elelem
 
     private
 
+    def invalid(tool, args)
+      errors = tool.validate(args)
+      Result.failure(error: errors.join(", ")) if errors.any?
+    end
+
+    def to_result(result)
+      result[:error] ? Result.failure(result) : Result.success(result)
+    end
+
+    def failure(name, args, error)
+      Elelem.logger.warn("toolbox: #{error.message}\n#{error.backtrace.join("\n")}")
+      Result.failure(error: error.message, name: name, args: args)
+    end
+
     def dispatch(tool, args)
+      run_before_hooks(tool, args)
+      result = tool.call(args)
+      run_after_hooks(tool, args, result)
+      result
+    end
+
+    def run_before_hooks(tool, args)
       @hooks[:before][:*].each { |h| h.call(args, tool_name: tool.name) }
       @hooks[:before][tool.name].each { |h| h.call(args) }
-      result = tool.call(args)
+    end
+
+    def run_after_hooks(tool, args, result)
       @hooks[:after][:*].each { |h| h.call(args, result, tool_name: tool.name) }
       @hooks[:after][tool.name].each { |h| h.call(args, result) }
-      result
     end
   end
 end

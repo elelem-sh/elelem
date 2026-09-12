@@ -20,18 +20,22 @@ require_relative "elelem/null_output"
 require_relative "elelem/plugins"
 require_relative "elelem/registration"
 require_relative "elelem/registry"
+require_relative "elelem/repl"
 require_relative "elelem/config"
 require_relative "elelem/result"
+require_relative "elelem/schema"
+require_relative "elelem/session"
 require_relative "elelem/stub_provider"
 require_relative "elelem/system_prompt"
 require_relative "elelem/tool"
+require_relative "elelem/transcript"
 require_relative "elelem/null_tool"
 require_relative "elelem/toolbox"
 require_relative "elelem/version"
 
 module Elelem
   def self.start(provider: "stub", toolbox: Toolbox.new)
-    build(provider: provider, toolbox: toolbox).repl
+    Repl.new(build(provider: provider, toolbox: toolbox)).run
   end
 
   def self.ask(prompt, provider: "stub", toolbox: Toolbox.new, output: NullOutput.new)
@@ -39,7 +43,7 @@ module Elelem
   end
 
   def self.build(provider: "stub", toolbox: Toolbox.new, input: nil, output: nil)
-    Config.build_agent(provider, toolbox: toolbox, input: input, output: output)
+    Config.build_session(provider, toolbox: toolbox, input: input, output: output)
   end
 
   def self.logger

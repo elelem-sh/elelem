@@ -8,6 +8,15 @@ require "reline"
 module Elelem
   class CLI
     COMMANDS = %w[chat ask files help].freeze
+    USAGE = <<~TEXT
+      \nCommands:
+        chat              Interactive REPL (default)
+        ask <prompt>      One-shot query (reads stdin if piped)
+        files             Output files as XML (no options)
+        help              Show this help
+      \nOptions:
+    TEXT
+    private_constant :USAGE
 
     def initialize(args, provider: "stub")
       @provider = provider
@@ -23,21 +32,24 @@ module Elelem
     private
 
     def parse(args)
-      @parser = OptionParser.new do |o|
-        o.banner = "Usage: #{File.basename($PROGRAM_NAME)} [command] [options] [args]"
-        o.separator "\nCommands:"
-        o.separator "  chat              Interactive REPL (default)"
-        o.separator "  ask <prompt>      One-shot query (reads stdin if piped)"
-        o.separator "  files             Output files as XML (no options)"
-        o.separator "  help              Show this help"
-        o.separator "\nOptions:"
-        o.on("-p", "--provider NAME", "Provider to use (default: #{@provider})") { |p| @provider = p }
-        o.on("-h", "--help", "Show this help") do
-          puts o
-          exit
-        end
-      end
+      @parser = OptionParser.new { |o| describe_options(o) }
       @parser.parse!(args)
+    end
+
+    def describe_options(parser)
+      describe_usage(parser)
+      parser.on("-p", "--provider NAME", "Provider to use (default: #{@provider})") { |p| @provider = p }
+      parser.on("-h", "--help", "Show this help") { print_help_and_exit(parser) }
+    end
+
+    def print_help_and_exit(parser)
+      puts parser
+      exit
+    end
+
+    def describe_usage(parser)
+      parser.banner = "Usage: #{File.basename($PROGRAM_NAME)} [command] [options] [args]"
+      parser.separator USAGE
     end
 
     def help
@@ -47,34 +59,58 @@ module Elelem
     def chat
       Elelem.start(provider: @provider)
     rescue StandardError, ScriptError => e
-      Elelem.logger.warn("cli: #{e.message}\n#{e.backtrace.join("\n")}")
-      abort "elelem: #{e.message}"
+      warn_and_abort(e)
     end
 
     def ask
       abort "Usage: elelem-chat ask <prompt>" if @args.empty?
+
+      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: output_for_ask)
+      print_reply(reply, piped: piped?)
+    rescue StandardError, ScriptError => e
+      warn_and_abort(e)
+    end
+
+    def piped?
+      !$stdout.tty?
+    end
+
+    def output_for_ask
+      Elelem::Output.new(stream: piped? ? $stderr : $stdout)
+    end
+
+    def prompt_for_ask
       prompt = @args.join(" ")
-      prompt = "#{prompt}\n\n```\n#{$stdin.read}\n```" if $stdin.stat.pipe?
-      piped = !$stdout.tty?
-      output = Elelem::Output.new(stream: piped ? $stderr : $stdout)
-      reply = Elelem.ask(prompt, provider: @provider, output: output)
+      $stdin.stat.pipe? ? "#{prompt}\n\n```\n#{$stdin.read}\n```" : prompt
+    end
+
+    def print_reply(reply, piped:)
       abort "elelem: no reply" if reply.to_s.strip.empty?
       Elelem::Output.new.say(reply, as: :markdown) if piped
-    rescue StandardError, ScriptError => e
-      Elelem.logger.warn("cli: #{e.message}\n#{e.backtrace.join("\n")}")
-      abort "elelem: #{e.message}"
+    end
+
+    def warn_and_abort(error)
+      Elelem.logger.warn("cli: #{error.message}\n#{error.backtrace.join("\n")}")
+      abort "elelem: #{error.message}"
     end
 
     def files
-      files = $stdin.stat.pipe? ? $stdin.readlines : `git ls-files`.lines
       puts "<documents>"
-      files.each_with_index do |line, i|
-        path = line.strip
-        next if path.empty? || !File.file?(path)
-
-        puts %(<document index="#{i + 1}"><source>#{path}</source><document_content><![CDATA[#{File.read(path)}]]></document_content></document>)
-      end
+      candidate_files.each_with_index { |line, i| print_document(line, i) }
       puts "</documents>"
+    end
+
+    def candidate_files
+      $stdin.stat.pipe? ? $stdin.readlines : `git ls-files`.lines
+    end
+
+    def print_document(line, index)
+      path = line.strip
+      return if path.empty? || !File.file?(path)
+
+      content = File.read(path)
+      puts %(<document index="#{index + 1}"><source>#{path}</source>) +
+           %(<document_content><![CDATA[#{content}]]></document_content></document>)
     end
   end
 end

@@ -17,34 +17,29 @@ module Elelem
       @registration.providers.fetch(name.to_s) { require_gem(name) }.call
     end
 
-    def apply(agent)
+    def apply(session)
       @plugins.load!
-      @registration.setups.each_value { |block| block.call(agent) }
+      @registration.setups.each_value { |block| block.call(session) }
     end
 
-    def reload(agent)
+    def reload(session)
       @registration.clear_setups!
-      agent.toolbox.clear!
-      agent.commands.clear!
+      session.toolbox.clear!
+      session.commands.clear!
       @plugins.load!(force: true)
-      apply(agent)
+      apply(session)
     end
 
     def names
       @registration.providers.keys
     end
 
-    def build_agent(provider, toolbox: Toolbox.new, input: nil, output: nil)
+    def build_session(provider, toolbox: Toolbox.new, input: nil, output: nil)
       commands = Commands.new
-      agent = Agent.new(
-        build_provider(provider),
-        toolbox: toolbox,
-        commands: commands,
-        input: input || build_input(commands: commands),
-        output: output || build_output
-      )
-      apply(agent)
-      agent
+      agent = Agent.new(build_provider(provider), toolbox: toolbox, output: output || build_output)
+      session = Session.new(agent, input: input || build_input(commands: commands), commands: commands)
+      apply(session)
+      session
     end
 
     private
@@ -61,11 +56,13 @@ module Elelem
 
     def require_gem(name)
       require "elelem/#{name}"
-      @registration.providers.fetch(name.to_s) do
-        raise "elelem-#{name} did not register a provider named #{name.inspect}"
-      end
+      @registration.providers.fetch(name.to_s) { unregistered_provider(name) }
     rescue LoadError
       raise "unknown provider: #{name.inspect}. Available: #{names.join(", ")}. Run: gem install elelem-#{name}"
+    end
+
+    def unregistered_provider(name)
+      raise "elelem-#{name} did not register a provider named #{name.inspect}"
     end
   end
 end
