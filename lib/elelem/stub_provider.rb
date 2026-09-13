@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Elelem
-  class TestProvider
+  class StubProvider
     def fetch(messages, tools = [], &block)
       block.call(type: "thinking", text: "considering the request")
       return block.call(type: "saying", text: "done.") if messages.last[:role] == "tool"

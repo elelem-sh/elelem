@@ -18,7 +18,7 @@ module Elelem
     TEXT
     private_constant :USAGE
 
-    def initialize(args, provider: "test")
+    def initialize(args, provider: "stub")
       @provider = provider
       @args = parse(args)
     end

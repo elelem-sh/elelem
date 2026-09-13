@@ -3,7 +3,7 @@
 RSpec.describe Elelem::Session do
   subject(:session) { described_class.new(agent, input: input, commands: commands) }
 
-  let(:agent) { Elelem::Agent.new(Elelem::TestProvider.new) }
+  let(:agent) { Elelem::Agent.new(Elelem::StubProvider.new) }
   let(:input) { Elelem::NullInput.new }
   let(:commands) { Elelem::Commands.new }
 
@@ -18,7 +18,7 @@ RSpec.describe Elelem::Session do
   end
 
   it "delegates provider= to the agent" do
-    new_provider = Elelem::TestProvider.new
+    new_provider = Elelem::StubProvider.new
 
     session.provider = new_provider
 
