@@ -25,7 +25,7 @@ require_relative "elelem/config"
 require_relative "elelem/result"
 require_relative "elelem/schema"
 require_relative "elelem/session"
-require_relative "elelem/stub_provider"
+require_relative "elelem/test_provider"
 require_relative "elelem/system_prompt"
 require_relative "elelem/tool"
 require_relative "elelem/transcript"
@@ -34,15 +34,15 @@ require_relative "elelem/toolbox"
 require_relative "elelem/version"
 
 module Elelem
-  def self.start(provider: "stub", toolbox: Toolbox.new)
+  def self.start(provider: "test", toolbox: Toolbox.new)
     Repl.new(build(provider: provider, toolbox: toolbox)).run
   end
 
-  def self.ask(prompt, provider: "stub", toolbox: Toolbox.new, output: NullOutput.new)
+  def self.ask(prompt, provider: "test", toolbox: Toolbox.new, output: NullOutput.new)
     build(provider: provider, toolbox: toolbox, input: NullInput.new, output: output).turn(prompt)
   end
 
-  def self.build(provider: "stub", toolbox: Toolbox.new, input: nil, output: nil)
+  def self.build(provider: "test", toolbox: Toolbox.new, input: nil, output: nil)
     Config.build_session(provider, toolbox: toolbox, input: input, output: output)
   end
 
@@ -53,4 +53,7 @@ module Elelem
   end
 end
 
-Elelem.configure { |config| config.provider(:stub) { Elelem::StubProvider.new } }
+Elelem.configure do |config|
+  config.provider(:test) { Elelem::TestProvider.new }
+  config.provider(:stub) { Elelem::TestProvider.new }
+end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Elelem::StubProvider do
+RSpec.describe Elelem::TestProvider do
   subject(:provider) { described_class.new }
 
   it "streams thinking, says something, and calls the first available tool" do
