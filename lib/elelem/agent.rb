@@ -5,11 +5,11 @@ module Elelem
     attr_reader :conversation, :toolbox, :output
     attr_accessor :provider
 
-    def initialize(provider, toolbox: Toolbox.new, output: NullOutput.new, system_prompt: nil)
+    def initialize(provider, toolbox: Toolbox.new, output: NullOutput.new, template: nil, system_prompt: nil)
       @provider = provider
       @toolbox = toolbox
       @output = output
-      @conversation = Transcript.new(system_prompt: system_prompt)
+      @conversation = Transcript.new(template: template, system_prompt: system_prompt)
     end
 
     def context

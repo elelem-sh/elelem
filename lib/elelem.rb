@@ -34,16 +34,21 @@ require_relative "elelem/toolbox"
 require_relative "elelem/version"
 
 module Elelem
-  def self.start(provider: "stub", toolbox: Toolbox.new)
-    Repl.new(build(provider: provider, toolbox: toolbox)).run
+  def self.start(provider: "stub", toolbox: Toolbox.new, provider_options: {}, template: nil, system_prompt: nil)
+    Repl.new(build(provider: provider, toolbox: toolbox, provider_options: provider_options, template: template,
+                   system_prompt: system_prompt)).run
   end
 
-  def self.ask(prompt, provider: "stub", toolbox: Toolbox.new, output: NullOutput.new)
-    build(provider: provider, toolbox: toolbox, input: NullInput.new, output: output).turn(prompt)
+  def self.ask(prompt, provider: "stub", toolbox: Toolbox.new, output: NullOutput.new, provider_options: {},
+               template: nil, system_prompt: nil)
+    build(provider: provider, toolbox: toolbox, input: NullInput.new, output: output,
+          provider_options: provider_options, template: template, system_prompt: system_prompt).turn(prompt)
   end
 
-  def self.build(provider: "stub", toolbox: Toolbox.new, input: nil, output: nil)
-    Config.build_session(provider, toolbox: toolbox, input: input, output: output)
+  def self.build(provider: "stub", toolbox: Toolbox.new, input: nil, output: nil, provider_options: {},
+                 template: nil, system_prompt: nil)
+    Config.build_session(provider, toolbox: toolbox, input: input, output: output,
+                                   provider_options: provider_options, template: template, system_prompt: system_prompt)
   end
 
   def self.logger

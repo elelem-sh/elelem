@@ -31,6 +31,22 @@ RSpec.describe Elelem::Registry do
     it "raises a friendly error for unknown provider" do
       expect { registry.build_provider("unknown") }.to raise_error(/unknown provider/)
     end
+
+    it "passes options through to the factory" do
+      seen = nil
+      registry.configure { |c| c.provider(:model_aware) { |**options| seen = options } }
+
+      registry.build_provider("model_aware", model: "some.gguf")
+
+      expect(seen).to eq(model: "some.gguf")
+    end
+
+    it "does not raise when a zero-arg factory is built with options" do
+      provider = double("provider")
+      registry.configure { |c| c.provider(:legacy) { provider } }
+
+      expect(registry.build_provider("legacy", model: "some.gguf")).to eq(provider)
+    end
   end
 
   describe "#names" do

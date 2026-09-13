@@ -2,9 +2,10 @@
 
 module Elelem
   class Transcript
-    def initialize(system_prompt: nil)
+    def initialize(template: nil, system_prompt: nil)
       @conversation = Conversation.new
-      @system_prompt = SystemPrompt.new(system_prompt)
+      @template = SystemPrompt.new(template)
+      @system_prompt = system_prompt
     end
 
     def add(role:, content:, **extra)
@@ -20,7 +21,13 @@ module Elelem
     end
 
     def to_a(extra = [])
-      @conversation.to_a(system_prompt: @system_prompt.render) + extra
+      @conversation.to_a(system_prompt: rendered_system_prompt) + extra
+    end
+
+    private
+
+    def rendered_system_prompt
+      [@system_prompt, @template.render].compact.join("\n\n")
     end
   end
 end

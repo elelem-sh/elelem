@@ -12,9 +12,9 @@ module Elelem
       self
     end
 
-    def build_provider(name)
+    def build_provider(name, **)
       @plugins.load!
-      @registration.providers.fetch(name.to_s) { require_gem(name) }.call
+      @registration.providers.fetch(name.to_s) { require_gem(name) }.call(**)
     end
 
     def apply(session)
@@ -34,9 +34,11 @@ module Elelem
       @registration.providers.keys
     end
 
-    def build_session(provider, toolbox: Toolbox.new, input: nil, output: nil)
+    def build_session(provider, toolbox: Toolbox.new, input: nil, output: nil, provider_options: {},
+                      template: nil, system_prompt: nil)
       commands = Commands.new
-      agent = Agent.new(build_provider(provider), toolbox: toolbox, output: output || build_output)
+      agent = Agent.new(build_provider(provider, **provider_options), toolbox: toolbox, output: output || build_output,
+                                                                      template: template, system_prompt: system_prompt)
       session = Session.new(agent, input: input || build_input(commands: commands), commands: commands)
       apply(session)
       session

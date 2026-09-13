@@ -20,6 +20,7 @@ module Elelem
 
     def initialize(args, provider: "stub")
       @provider = provider
+      @provider_options = {}
       @args = parse(args)
     end
 
@@ -39,6 +40,8 @@ module Elelem
     def describe_options(parser)
       describe_usage(parser)
       parser.on("-p", "--provider NAME", "Provider to use (default: #{@provider})") { |p| @provider = p }
+      parser.on("--model NAME", "Model to use, passed to the provider") { |m| @provider_options[:model] = m }
+      parser.on("--system-prompt TEXT", "Role text prepended to the system prompt") { |s| @system_prompt = s }
       parser.on("-h", "--help", "Show this help") { print_help_and_exit(parser) }
     end
 
@@ -57,7 +60,7 @@ module Elelem
     end
 
     def chat
-      Elelem.start(provider: @provider)
+      Elelem.start(provider: @provider, provider_options: @provider_options, system_prompt: @system_prompt)
     rescue StandardError, ScriptError => e
       warn_and_abort(e)
     end
@@ -65,7 +68,8 @@ module Elelem
     def ask
       abort "Usage: elelem-chat ask <prompt>" if @args.empty?
 
-      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: output_for_ask)
+      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: output_for_ask,
+                                         provider_options: @provider_options, system_prompt: @system_prompt)
       print_reply(reply, piped: piped?)
     rescue StandardError, ScriptError => e
       warn_and_abort(e)
