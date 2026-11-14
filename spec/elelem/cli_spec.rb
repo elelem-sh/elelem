@@ -24,4 +24,8 @@ RSpec.describe Elelem::CLI do
       expect(seen[:system_prompt]).to eq("Editor.")
     end
   end
+
+  it "prints a piped reply as plain text, not a code fence" do
+    expect { described_class.new([]).send(:print_reply, "hello", piped: true) }.to output("hello\n").to_stdout
+  end
 end

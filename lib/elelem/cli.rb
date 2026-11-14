@@ -90,7 +90,7 @@ module Elelem
 
     def print_reply(reply, piped:)
       abort "elelem: no reply" if reply.to_s.strip.empty?
-      Elelem::Output.new.say(reply, as: :markdown) if piped
+      $stdout.puts(reply) if piped
     end
 
     def warn_and_abort(error)
