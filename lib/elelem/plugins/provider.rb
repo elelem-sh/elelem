@@ -6,10 +6,10 @@ Elelem.configure do |config|
       Elelem::Config.names
     }) do |name|
       if name.nil? || name.empty?
-        agent.output.say "  → available: #{Elelem::Config.names.join(", ")}"
+        agent.output.say "  -> available: #{Elelem::Config.names.join(", ")}"
       else
         agent.provider = Elelem::Config.build_provider(name)
-        agent.output.say "  → switched to #{name}"
+        agent.output.say "  -> switched to #{name}"
       end
     end
   end

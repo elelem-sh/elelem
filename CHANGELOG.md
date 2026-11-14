@@ -130,7 +130,7 @@
   - `elelem ask <prompt>` - One-shot query (reads stdin if piped)
   - `elelem files` - Output files as XML
 - JSON Schema validation for tool call arguments (via `json_schemer`)
-- Tool aliases support (e.g., `bash`, `sh`, `exec` → `execute`)
+- Tool aliases support (e.g., `bash`, `sh`, `exec` for `execute`)
 - **Dependencies documentation** in README with installation links
 
 ### Removed
@@ -156,7 +156,7 @@
 ### Added
 - `fetch` tool for HTTP GET requests (returns status and body)
 - `search_engine` tool for DuckDuckGo Instant Answer API searches
-- Tool aliases: `get`/`web` → `fetch`, `ddg`/`duckduckgo` → `search_engine`
+- Tool aliases: `get`/`web` for `fetch`, `ddg`/`duckduckgo` for `search_engine`
 - `net-hippie` and `cgi` dependencies for HTTP requests
 
 ## [0.7.0] - 2026-01-14

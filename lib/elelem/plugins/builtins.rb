@@ -6,7 +6,7 @@ Elelem.configure do |config|
 
     agent.commands.register("clear", description: "Clear conversation history") do
       agent.conversation.clear!
-      agent.output.say "  → context cleared"
+      agent.output.say "  -> context cleared"
     end
 
     agent.commands.register("help", description: "Show available commands") do
