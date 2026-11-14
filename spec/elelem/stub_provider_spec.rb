@@ -39,6 +39,23 @@ RSpec.describe Elelem::StubProvider do
     expect(args).to eq("path" => "README.md")
   end
 
+  it "leaves out missing arguments, so the toolbox rejects the call" do
+    expect(events_for(user("write notes.txt")).last[:arguments]).to eq("path" => "notes.txt")
+    expect(events_for(user("read")).last[:arguments]).to eq({})
+  end
+
+  it "never writes an empty file when the content is missing" do
+    calls = []
+    toolbox = Elelem::Toolbox.new
+    toolbox.add("write", description: "Write file", params: { path: { type: "string" }, content: { type: "string" } },
+                         required: %w[path content]) { |a| calls << a and {} }
+
+    reply = Elelem::Agent.new(provider, toolbox: toolbox).turn("write notes.txt")
+
+    expect(calls).to be_empty
+    expect(reply).to start_with("error:")
+  end
+
   it "says the usage when the first word is not a tool" do
     events = events_for(user("make the tests pass"))
 

@@ -36,7 +36,8 @@ module Elelem
 
     def arguments(tool, rest)
       required = tool.dig(:function, :parameters, :required) || []
-      required.zip(rest.split(/\s+/, required.size)).to_h { |key, value| [key.to_s, value.to_s] }
+      values = rest.split(/\s+/, required.size)
+      required.zip(values).to_h.compact.transform_keys(&:to_s)
     end
 
     def report(content, &)
