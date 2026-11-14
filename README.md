@@ -35,7 +35,8 @@ elelem ships with `read`, `write` and `execute`. Use the plugin API to add more.
 
 ## Models
 
-Without a model, elelem does what you type: `read README.md`, `execute ls`.
+Without a model, elelem understands a few plain requests, like `show me README.md`
+or `run the tests`, and any tool name followed by its arguments.
 For a real model, install a provider:
 
 ```bash
@@ -55,4 +56,4 @@ Send me a patch via email. For instructions see https://git-send-email.io/.
 
 ## License
 
-MIT – see the bundled `LICENSE.txt`.
+MIT. See the bundled `LICENSE.txt`.

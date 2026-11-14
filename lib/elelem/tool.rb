@@ -20,6 +20,8 @@ module Elelem
       @schema.validate(args)
     end
 
+    def inspect = "#<#{self.class} #{name}>"
+
     def to_h
       {
         type: "function",

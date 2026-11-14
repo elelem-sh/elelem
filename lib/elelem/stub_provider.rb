@@ -1,37 +1,76 @@
 # frozen_string_literal: true
 
 module Elelem
-  # No model. Does what you type: the first word names a tool, the rest are its arguments.
+  # No model. Understands a few plain requests, or a tool name and its arguments.
+  # Reads only the first line, so piped text never becomes arguments.
   class StubProvider
-    USAGE = <<~TEXT
-      No model here. Type a tool and its arguments: read README.md · write notes.txt hi · execute ls
-      For a real model: gem install elelem-llama, then elelem -p llama
-      Docs: https://elelem.sh
+    INTENTS = [
+      [/\A(?:show(?: me)?|cat|open|read|print|what'?s in|what is in|look at)\s+(?:the file\s+)?(\S+?)\??\z/i,
+       "read", ->(m) { { "path" => m[1] } }],
+      [/\A(?:create|make|write)\s+(?:a file\s+)?(?:called\s+|named\s+)?(\S+)\s+(?:with|containing|saying)\s+(.+)\z/i,
+       "write", ->(m) { { "path" => m[1], "content" => m[2] } }],
+      [/\A(?:run|execute)\s+the\s+tests\??\z/i,
+       "execute", ->(_) { { "command" => File.executable?("bin/test") ? "bin/test" : "rake" } }],
+      [/\A(?:what files are (?:here|there)|list (?:the )?files|ls)\??\z/i,
+       "execute", ->(_) { { "command" => "ls" } }],
+      [/\A(?:run|execute)\s+`?(.+?)`?\z/i, "execute", ->(m) { { "command" => m[1] } }]
+    ].freeze
+
+    THOUGHTS = {
+      "read" => ->(a) { "The user wants to see #{a["path"]}. I'll read it." },
+      "write" => ->(a) { "I'll write #{a["path"]}." },
+      "execute" => ->(a) { "I'll run `#{a["command"]}`." }
+    }.freeze
+
+    SUMMARIES = {
+      "read" => ->(a, r) { "#{a["path"]} has #{StubProvider.lines(r["content"])}." },
+      "write" => ->(a, r) { "Wrote #{r["bytes"]} bytes to #{a["path"]}." },
+      "execute" => ->(a, r) { "`#{a["command"]}` exited #{r["exit_status"]}." }
+    }.freeze
+
+    HELP = <<~TEXT
+      I need a model to understand that. Without one, I can do:
+
+          show me README.md
+          create notes.txt with hello
+          what files are here
+          run the tests
+
+      Or type a tool and its arguments. /tools lists them.
+      For a model: gem install elelem-llama, then elelem -p llama
     TEXT
 
-    def fetch(messages, tools = [], &)
-      last = messages.last
-      return report(last[:content], &) if last[:role] == "tool"
+    def self.lines(text)
+      count = text.to_s.lines.size
+      count == 1 ? "1 line" : "#{count} lines"
+    end
 
-      name, rest = first_line(last[:content]).split(/\s+/, 2)
-      tool = tools.find { |t| t.dig(:function, :name) == name }
-      tool ? call(tool, name, rest.to_s, messages.length, &) : unknown(name, &)
+    def fetch(messages, tools = [], &)
+      return report(messages, &) if messages.last[:role] == "tool"
+
+      name, args = understand(messages.last[:content].to_s.lines.first.to_s.strip, tools)
+      name ? act(name, args, messages.length, &) : say("I don't understand this request.", HELP, &)
     end
 
     private
 
-    def first_line(content)
-      content.to_s.lines.first.to_s.strip
+    def understand(text, tools)
+      names = tools.map { |t| t.dig(:function, :name) }
+      intent(text, names) || direct(text, tools)
     end
 
-    def unknown(name, &)
-      say(name ? "#{name} is not a tool." : "nothing typed.", USAGE, &)
+    def intent(text, names)
+      INTENTS.each do |pattern, name, build|
+        match = pattern.match(text)
+        return [name, build.call(match)] if match && names.include?(name)
+      end
+      nil
     end
 
-    def call(tool, name, rest, turn, &block)
-      args = arguments(tool, rest)
-      block.call(type: "thinking", text: "#{name}: #{args.map { |k, v| "#{k} = #{v}" }.join(", ")}")
-      block.call(type: "doing", id: "stub-#{turn}", name: name, arguments: args)
+    def direct(text, tools)
+      name, rest = text.split(/\s+/, 2)
+      tool = tools.find { |t| t.dig(:function, :name) == name }
+      [name, arguments(tool, rest.to_s)] if tool
     end
 
     def arguments(tool, rest)
@@ -40,24 +79,34 @@ module Elelem
       required.zip(values).to_h.compact.transform_keys(&:to_s)
     end
 
-    def report(content, &)
-      result = parse(content)
-      return say("the tool failed.", "error: #{result["error"]}", &) if result["error"]
-      return say("the command failed.", "exit #{result["exit_status"]}", &) if result["exit_status"].to_i.nonzero?
+    def act(name, args, turn)
+      thought = THOUGHTS.fetch(name) { ->(_) { "I'll call #{name}." } }
+      yield(type: "thinking", text: thought.call(args))
+      yield(type: "doing", id: "stub-#{turn}", name: name, arguments: args)
+    end
 
-      say("the tool ran.", "done.", &)
+    def report(messages)
+      call = messages.rfind { |m| m[:tool_calls] }&.dig(:tool_calls, 0) || {}
+      yield(type: "saying", text: summary(call[:name].to_s, call[:arguments] || {}, parse(messages.last[:content])))
+    end
+
+    def summary(name, args, result)
+      return "#{name} failed: #{result["error"]}. /tools shows what it takes." if result["error"]
+
+      SUMMARIES.fetch(name) { ->(_, r) { r.empty? ? "#{name} is done." : r.map { |k, v| "#{k}: #{v}" }.join("\n") } }
+               .call(args, result.except("ok"))
     end
 
     def parse(content)
       result = JSON.parse(content.to_s)
-      result.is_a?(Hash) ? result : {}
+      result.is_a?(Hash) ? result : { "result" => result }
     rescue JSON::ParserError
-      {}
+      { "result" => content.to_s }
     end
 
-    def say(thought, text, &block)
-      block.call(type: "thinking", text: thought)
-      block.call(type: "saying", text: text)
+    def say(thought, text)
+      yield(type: "thinking", text: thought)
+      yield(type: "saying", text: text)
     end
   end
 end

@@ -104,4 +104,10 @@ RSpec.describe Elelem::Toolbox do
       expect(order).to eq(%i[global specific])
     end
   end
+
+  it "returns the tool it adds, so eval can show it" do
+    tool = described_class.new.add("now", description: "Current time") { {} }
+
+    expect(tool.inspect).to eq("#<Elelem::Tool now>")
+  end
 end

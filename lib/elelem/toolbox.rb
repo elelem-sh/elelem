@@ -22,6 +22,7 @@ module Elelem
       tool = Tool.new(name, description: description, schema: schema, aliases: aliases, &handler)
       @tools[name] = tool
       tool.aliases.each { |a| @aliases[a] = name }
+      tool
     end
 
     def before(tool_name = :*, &block)
