@@ -3,6 +3,7 @@
 module Elelem
   class Plugins
     LOAD_PATHS = [
+      File.expand_path("plugins", __dir__),
       "~/.agents/plugins",
       ".agents/plugins"
     ].freeze

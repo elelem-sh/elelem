@@ -2,8 +2,7 @@
 
 RSpec.describe Elelem::Config do
   before do
-    registry = Elelem::Registry.new
-    allow(registry).to receive(:load!)
+    registry = Elelem::Registry.new(plugins: Elelem::Plugins.new(load_paths: []))
     allow(Elelem::Config).to receive(:default).and_return(registry)
   end
 

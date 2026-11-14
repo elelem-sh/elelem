@@ -25,12 +25,13 @@ Gem::Specification.new do |spec|
     "Rakefile",
     "exe/elelem",
     "lib/elelem.rb"
-  ] + Dir["lib/elelem/*.rb"] + Dir["lib/elelem/prompts/**/*.erb"]
+  ] + Dir["lib/elelem/*.rb"] + Dir["lib/elelem/{builtins,plugins}/*.rb"] + Dir["lib/elelem/prompts/**/*.erb"]
   spec.bindir = "exe"
   spec.executables = ["elelem"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "erb", "~> 6.0"
+  spec.add_dependency "fileutils", "~> 1.8"
   spec.add_dependency "forwardable", "~> 1.4"
   spec.add_dependency "io-console", "~> 0.9"
   spec.add_dependency "json", "~> 3.0"
@@ -41,5 +42,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "pathname", "~> 0.5"
   spec.add_dependency "reline", "~> 0.7"
   spec.add_dependency "shellwords", "~> 0.2"
+  spec.add_dependency "stringio", "~> 3.1"
+  spec.add_dependency "tempfile", "~> 0.3"
   spec.add_dependency "uri", "~> 1.0"
 end

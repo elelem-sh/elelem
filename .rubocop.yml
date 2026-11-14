@@ -69,3 +69,10 @@ Style/StringLiteralsInInterpolation:
 
 Layout/LineLength:
   Max: 120
+
+# Moved from elelem-builtins, which did not enforce size metrics.
+Metrics:
+  Exclude:
+    - "lib/elelem/builtins.rb"
+    - "lib/elelem/builtins/**/*"
+    - "lib/elelem/plugins/**/*"

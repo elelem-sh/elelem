@@ -10,6 +10,7 @@ require "pathname"
 require "shellwords"
 
 require_relative "elelem/agent"
+require_relative "elelem/builtins"
 require_relative "elelem/slash_command"
 require_relative "elelem/commands"
 require_relative "elelem/conversation"
