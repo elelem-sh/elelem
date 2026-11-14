@@ -106,4 +106,16 @@ RSpec.describe Elelem::Registry do
       expect(registry.build_provider("test")).to eq(provider)
     end
   end
+
+  describe "core's terminal output" do
+    let(:core_plugins) { Elelem::Plugins.new(load_paths: [File.expand_path("../../lib/elelem/plugins", __dir__)]) }
+
+    it "is a fallback: an output a gem registered first still wins after plugins load" do
+      gem_output = Object.new
+      registry = described_class.new(plugins: core_plugins)
+      registry.configure { |c| c.output { gem_output } }
+
+      expect(registry.send(:build_output)).to be(gem_output)
+    end
+  end
 end
