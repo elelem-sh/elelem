@@ -23,20 +23,32 @@ gem install elelem
 
 ## Usage
 
-Start an interactive chat session:
+Start elelem:
 
 ```bash
-elelem chat
+elelem
 ```
 
 ## Tools
 
-Use the plugin API to add tools.
+elelem ships with `read`, `write` and `execute`. Use the plugin API to add more.
+
+## Models
+
+Without a model, elelem does what you type: `read README.md`, `execute ls`.
+For a real model, install a provider:
+
+```bash
+gem install elelem-llama
+elelem -p llama
+```
+
+Read the docs at https://elelem.sh.
 
 ## Contributing
 
 ```bash
-$ git clone https://git.mokhan.ca/elelem/elelem.git
+git clone https://github.com/elelem-sh/elelem.git
 ```
 
 Send me a patch via email. For instructions see https://git-send-email.io/.
