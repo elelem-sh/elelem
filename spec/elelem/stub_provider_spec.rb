@@ -95,6 +95,19 @@ RSpec.describe Elelem::StubProvider do
       end
     end
 
+    it "never writes to a word that is not a file name" do
+      expect(events_for(user("write a commit message")).last[:text]).to eq(described_class::HELP)
+      expect(events_for(user("make docs with hugo")).last[:text]).to eq(described_class::HELP)
+    end
+
+    it "runs tests without 'the' and reads a path followed by a period" do
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) { expect(events_for(user("run tests")).last[:arguments]).to eq("command" => "rake") }
+      end
+      expect(events_for(user("show me README.md.")).last[:arguments]).to eq("path" => "README.md")
+      expect(events_for(user("what\u2019s in Gemfile?")).last[:arguments]).to eq("path" => "Gemfile")
+    end
+
     it "never puts piped text into a command" do
       args = events_for(user("run ls\n\n```\nrm -rf /\n```")).last[:arguments]
 

@@ -5,11 +5,11 @@ module Elelem
   # Reads only the first line, so piped text never becomes arguments.
   class StubProvider
     INTENTS = [
-      [/\A(?:show(?: me)?|cat|open|read|print|what'?s in|what is in|look at)\s+(?:the file\s+)?(\S+?)\??\z/i,
+      [/\A(?:show(?: me)?|cat|open|read|print|what['\u2019]?s in|what is in|look at)\s+(?:the file\s+)?(\S+?)[.?!]?\z/i,
        "read", ->(m) { { "path" => m[1] } }],
-      [/\A(?:create|make|write)\s+(?:a file\s+)?(?:called\s+|named\s+)?(\S+)\s+(?:with|containing|saying)\s+(.+)\z/i,
+      [%r{\A(?:create|make|write)\s+(?:a file\s+)?(?:called\s+|named\s+)?(\S*[./]\S*)\s+(?:with|containing)\s+(.+)\z}i,
        "write", ->(m) { { "path" => m[1], "content" => m[2] } }],
-      [/\A(?:run|execute)\s+the\s+tests\??\z/i,
+      [/\A(?:run|execute)\s+(?:the\s+)?tests?[.?!]?\z/i,
        "execute", ->(_) { { "command" => File.executable?("bin/test") ? "bin/test" : "rake" } }],
       [/\A(?:what files are (?:here|there)|list (?:the )?files|ls)\??\z/i,
        "execute", ->(_) { { "command" => "ls" } }],
@@ -70,7 +70,13 @@ module Elelem
     def direct(text, tools)
       name, rest = text.split(/\s+/, 2)
       tool = tools.find { |t| t.dig(:function, :name) == name }
-      [name, arguments(tool, rest.to_s)] if tool
+      args = arguments(tool, rest.to_s) if tool
+      [name, args] if args && file_like?(name, args)
+    end
+
+    # A model would not write to "a" when asked to "write a commit message".
+    def file_like?(name, args)
+      name != "write" || args["path"].to_s.match?(%r{[./]})
     end
 
     def arguments(tool, rest)
