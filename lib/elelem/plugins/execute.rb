@@ -7,8 +7,7 @@ Elelem.configure do |config|
                       params: { command: { type: "string" } },
                       required: ["command"],
                       aliases: ["bash", "sh", "exec", "execute<|channel|>"]) do |a|
-      value = ENV.fetch("ELELEM_CMD_TIMEOUT", "")
-      timeout = value.empty? ? 300 : Integer(value)
+      timeout = Integer(ENV.fetch("ELELEM_CMD_TIMEOUT", "0"))
       timeout = nil unless timeout.positive?
       result = Elelem::Builtins.sh("bash", args: ["-c", a["command"]], timeout: timeout) { |x| agent.output.print(x) }
       result[:exit_status].zero? ? result : result.merge(error: "exit #{result[:exit_status]}")

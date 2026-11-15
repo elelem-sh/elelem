@@ -29,12 +29,12 @@ RSpec.describe "the execute tool" do
     expect([result.ok?, result[:content]]).to eq([true, "a\uFFFDb\n"])
   end
 
-  it "times out after 300 seconds by default, so a background job cannot hang the session" do
+  it "runs without a timeout by default, so a command can prompt on the terminal" do
     allow(Elelem::Builtins).to receive(:sh).and_return({ exit_status: 0, content: "" })
 
     session.toolbox.run("execute", { "command" => "true" })
 
-    expect(Elelem::Builtins).to have_received(:sh).with("bash", hash_including(timeout: 300))
+    expect(Elelem::Builtins).to have_received(:sh).with("bash", hash_including(timeout: nil))
   end
 
   it "takes the timeout from ELELEM_CMD_TIMEOUT" do
