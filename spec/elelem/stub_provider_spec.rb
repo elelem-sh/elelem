@@ -143,10 +143,16 @@ RSpec.describe Elelem::StubProvider do
     expect(events_for(after("now", {}, { time: "noon", ok: true })).last[:text]).to eq("time: noon")
   end
 
-  it "reports a tool error with a hint" do
+  it "reports a tool error without advice that does not apply" do
     text = events_for(after("read", { "path" => "nope" }, { error: "not found" })).last[:text]
 
-    expect(text).to eq("read failed: not found. /tools shows what it takes.")
+    expect(text).to eq("read failed: not found.")
+  end
+
+  it "points at /tools when the call was missing an argument" do
+    text = events_for(after("read", {}, { error: "missing path" })).last[:text]
+
+    expect(text).to eq("read failed: missing path. /tools shows what read takes.")
   end
 
   it "drives a full Agent#turn: calls the tool once, then stops" do

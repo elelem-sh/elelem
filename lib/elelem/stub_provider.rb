@@ -46,7 +46,7 @@ module Elelem
     end
 
     def fetch(messages, tools = [], &)
-      return report(messages, &) if messages.last[:role] == "tool"
+      return report(messages, tools, &) if messages.last[:role] == "tool"
 
       name, args = understand(messages.last[:content].to_s.lines.first.to_s.strip, tools)
       name ? act(name, args, messages.length, &) : say("I don't understand this request.", HELP, &)
@@ -91,13 +91,21 @@ module Elelem
       yield(type: "doing", id: "stub-#{turn}", name: name, arguments: args)
     end
 
-    def report(messages)
+    def report(messages, tools)
       call = messages.rfind { |m| m[:tool_calls] }&.dig(:tool_calls, 0) || {}
-      yield(type: "saying", text: summary(call[:name].to_s, call[:arguments] || {}, parse(messages.last[:content])))
+      text = summary(call[:name].to_s, call[:arguments] || {}, parse(messages.last[:content]), tools)
+      yield(type: "saying", text: text)
     end
 
-    def summary(name, args, result)
-      return "#{name} failed: #{result["error"]}. /tools shows what it takes." if result["error"]
+    # Point at /tools only when the call was missing something it takes.
+    def hint(tools, name, args)
+      tool = tools.find { |t| t.dig(:function, :name) == name }
+      required = tool&.dig(:function, :parameters, :required) || []
+      (required.map(&:to_s) - args.keys.map(&:to_s)).empty? ? "" : " /tools shows what #{name} takes."
+    end
+
+    def summary(name, args, result, tools)
+      return "#{name} failed: #{result["error"]}.#{hint(tools, name, args)}" if result["error"]
 
       SUMMARIES.fetch(name) { ->(_, r) { r.empty? ? "#{name} is done." : r.map { |k, v| "#{k}: #{v}" }.join("\n") } }
                .call(args, result.except("ok"))
