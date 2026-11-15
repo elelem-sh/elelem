@@ -47,7 +47,7 @@ module Elelem
       case event[:type]
       when "saying" then content << event[:text].to_s
       when "thinking" then output.thinking(event[:text])
-      when "doing" then tool_calls << { id: event[:id], name: event[:name], arguments: event[:arguments] }
+      when "doing" then tool_calls << event.slice(:id, :name, :arguments)
       end
     end
 
