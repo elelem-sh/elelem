@@ -20,8 +20,7 @@ jobs:
         with:
           ruby-version: "4.0"
           bundler-cache: true
-      - run: bin/test
-      - run: bin/lint
+      - run: bin/cibuild
   release-please:
     needs: test
     runs-on: ubuntu-latest

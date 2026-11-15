@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+[ -n "$DEBUG" ] && set -x
+
+cd "$(dirname "$0")/.."
+
+bundle install
+bin/test
+bin/lint
+gem build elelem.gemspec
