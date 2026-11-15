@@ -16,7 +16,7 @@ its own gem:
 | `elelem-gemini`        | `gemini`        | `GEMINI_API_KEY`        |
 | `elelem-cerebras`      | `cerebras`      | `CEREBRAS_API_KEY`      |
 | `elelem-mistral`       | `mistral`       | `MISTRAL_API_KEY`       |
-| `elelem-github-models` | `github-models` | `GITHUB_MODELS_API_KEY` |
+| `elelem-github`        | `github`        | `GITHUB_API_KEY`        |
 | `elelem-cloudflare`    | `cloudflare`    | `CLOUDFLARE_API_TOKEN`  |
 
 1. **Gem**: one file, `lib/elelem/NAME.rb`. It requires `elelem/openai`
@@ -29,10 +29,8 @@ its own gem:
 2. **Env**: each gem reads its own `NAME_API_KEY`, `NAME_MODEL`,
    `NAME_BASE_URL`. An empty value counts as unset, with the same lambda
    as `openai.rb:16`. Cloudflare keeps its own `CLOUDFLARE_API_TOKEN` and
-   also needs `CLOUDFLARE_ACCOUNT_ID` for its base URL. `github-models`
-   reads `GITHUB_MODELS_*`, lives in `lib/elelem/github-models.rb` and
-   registers with `config.provider("github-models")`, since `require_gem`
-   requires the name as given.
+   also needs `CLOUDFLARE_ACCOUNT_ID` for its base URL. `elelem-github`
+   reaches GitHub Models.
 3. **Model**: `--model` or `NAME_MODEL`. If neither is set, the error names
    the variable. No default model, since free model lists change often.
 4. **Quirks** stay in the vendor gem: a subclass of
