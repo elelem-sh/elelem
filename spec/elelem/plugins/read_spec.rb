@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "the read tool" do
-  let(:session) { Elelem::Config.build_session("stub", input: Elelem::NullInput.new, output: Elelem::NullOutput.new) }
+  let(:session) { Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: Elelem::NullOutput.new) }
 
   it "fails on a binary file instead of returning bytes the model cannot read" do
     Dir.mktmpdir do |dir|

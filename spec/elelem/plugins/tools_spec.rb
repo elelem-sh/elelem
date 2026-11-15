@@ -6,7 +6,7 @@ RSpec.describe "the /tools command" do
     said = self.said
     Elelem::NullOutput.new.tap { |o| o.define_singleton_method(:say) { |text, **| said << text } }
   end
-  let(:session) { Elelem::Config.build_session("stub", input: Elelem::NullInput.new, output: output) }
+  let(:session) { Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: output) }
 
   before do
     session.toolbox.add("greet", description: "Greets someone.\nMore detail.",

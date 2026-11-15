@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "the write tool" do
-  let(:session) { Elelem::Config.build_session("stub", input: Elelem::NullInput.new, output: Elelem::NullOutput.new) }
+  let(:session) { Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: Elelem::NullOutput.new) }
 
   it "writes the file and returns its size" do
     Dir.mktmpdir do |dir|
@@ -16,7 +16,7 @@ end
 RSpec.describe "the write tool's diff" do
   let(:stream) { StringIO.new }
   let(:input) { Class.new(Elelem::NullInput) { def interactive? = true }.new }
-  let(:session) { Elelem::Config.build_session("stub", input: input, output: Elelem::Output.new(stream: stream)) }
+  let(:session) { Elelem::Config.build_session("demo", input: input, output: Elelem::Output.new(stream: stream)) }
 
   it "shows the diff through the session output when the session is interactive" do
     Dir.mktmpdir do |dir|

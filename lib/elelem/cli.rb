@@ -16,7 +16,7 @@ module Elelem
     TEXT
     private_constant :USAGE
 
-    def initialize(args, provider: "stub")
+    def initialize(args, provider: "demo")
       @provider = provider
       @provider_options = {}
       @parser = OptionParser.new(USAGE) { |o| describe_options(o) }

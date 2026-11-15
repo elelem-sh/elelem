@@ -2,7 +2,7 @@
 
 RSpec.describe "the execute tool" do
   let(:output) { Elelem::Output.new(stream: StringIO.new) }
-  let(:session) { Elelem::Config.build_session("stub", input: Elelem::NullInput.new, output: output) }
+  let(:session) { Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: output) }
 
   around do |example|
     saved = ENV.delete("ELELEM_CMD_TIMEOUT")

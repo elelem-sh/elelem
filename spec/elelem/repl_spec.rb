@@ -16,7 +16,7 @@ RSpec.describe Elelem::Repl do
   end
 
   def session_with(input:, output: Elelem::NullOutput.new, commands: Elelem::Commands.new)
-    agent = Elelem::Agent.new(Elelem::StubProvider.new, output: output)
+    agent = Elelem::Agent.new(Elelem::Config.build_provider("demo"), output: output)
     Elelem::Session.new(agent, input: input, commands: commands)
   end
 

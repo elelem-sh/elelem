@@ -28,13 +28,12 @@ require_relative "elelem/commands"
 require_relative "elelem/agent"
 require_relative "elelem/session"
 require_relative "elelem/repl"
-require_relative "elelem/stub_provider"
 require_relative "elelem/plugins"
 require_relative "elelem/registry"
 require_relative "elelem/config"
 
 module Elelem
-  def self.build(provider: "stub", **) = Config.build_session(provider, **)
+  def self.build(provider: "demo", **) = Config.build_session(provider, **)
   def self.start(**) = Repl.new(build(**)).run
   def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)
 
@@ -60,5 +59,3 @@ module Elelem
   end
   private_class_method :log_device, :log_file
 end
-
-Elelem.configure { |config| config.provider(:stub) { Elelem::StubProvider.new } }
