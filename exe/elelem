@@ -3,6 +3,4 @@
 
 require "elelem/cli"
 
-Signal.trap("INT") { exit 1 }
-
 Elelem::CLI.new(ARGV).run

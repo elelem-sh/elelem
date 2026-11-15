@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 require "elelem"
-require "io/console"
 require "optparse"
-require "reline"
 
 module Elelem
   class CLI
@@ -26,14 +24,18 @@ module Elelem
     end
 
     def run
-      command = @args.shift || "chat"
-      COMMANDS.include?(command) ? send(command) : abort("Unknown command: #{command}")
+      Signal.trap("INT") { exit 1 }
+      dispatch(@args.shift || "chat")
     rescue StandardError, ScriptError => e
       Elelem.logger.debug("cli: #{e.message}\n#{e.backtrace.join("\n")}")
       abort "elelem: #{e.message}"
     end
 
     private
+
+    def dispatch(command)
+      COMMANDS.include?(command) ? send(command) : abort("Unknown command: #{command}")
+    end
 
     def describe_options(parser)
       parser.on("-p", "--provider NAME", "Provider to use (default: #{@provider})") { |p| @provider = p }

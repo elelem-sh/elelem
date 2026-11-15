@@ -3,6 +3,7 @@
 require "erb"
 require "fileutils"
 require "forwardable"
+require "io/console"
 require "json"
 require "json_schemer"
 require "logger"
