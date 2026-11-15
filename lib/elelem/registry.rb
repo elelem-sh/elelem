@@ -47,7 +47,7 @@ module Elelem
     private
 
     def build_input(**) = build(:input, Input, **)
-    def build_output = build(:output, Output)
+    def build_output = build(:output, Builtins::Terminal)
 
     # A plugin's factory, else core's class.
     def build(kind, klass, **)

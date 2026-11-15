@@ -126,6 +126,12 @@ RSpec.describe Elelem::Registry do
   describe "core's terminal output" do
     let(:core_plugins) { Elelem::Plugins.new(load_paths: [File.expand_path("../../lib/elelem/plugins", __dir__)]) }
 
+    it "is the default" do
+      registry = described_class.new(plugins: core_plugins)
+
+      expect(registry.send(:build_output)).to be_a(Elelem::Builtins::Terminal)
+    end
+
     it "is a fallback: an output a gem registered first still wins after plugins load" do
       gem_output = Object.new
       registry = described_class.new(plugins: core_plugins)
