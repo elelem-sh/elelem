@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.14.0](https://github.com/elelem-sh/elelem/compare/v0.13.1...v0.14.0) (2026-11-15)
+
+
+### Features
+
+* the demo reads `@path` with the read tool ([e6a1ab5](https://github.com/elelem-sh/elelem/commit/e6a1ab5529bc510efb178e3a2cd6cf986d391dbf))
+* the demo reads any file you name that is not executable ([7b52d42](https://github.com/elelem-sh/elelem/commit/7b52d4291bc7c8d51a90f1230f0a6b28939c8e98))
+
+
+### Bug Fixes
+
+* streamed command output keeps its blank lines ([feaa7c3](https://github.com/elelem-sh/elelem/commit/feaa7c309923369bdab408dde3475ea19479fbc9))
+* the demo reply says the exit status, without repeating the output it just showed ([23cae9f](https://github.com/elelem-sh/elelem/commit/23cae9f235bb88389ab2e65ac346fd61a52368d9))
+* waiting dots start after a moment, and end with a line break only when shown ([82da3cf](https://github.com/elelem-sh/elelem/commit/82da3cf98480fa90bb8787d1c44835be3b4ccfb3))
+
 ## [0.13.1](https://github.com/elelem-sh/elelem/compare/v0.13.0...v0.13.1) (2026-11-15)
 
 
