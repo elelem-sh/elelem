@@ -3,23 +3,30 @@
 module Elelem
   class Registry
     def initialize(plugins: Plugins.new)
-      @registration = Registration.new
       @plugins = plugins
+      @providers = {}
+      @setups = {}
+      @factories = { input: Input.method(:new), output: Builtins::Terminal.method(:new) }
     end
 
     def configure
-      yield @registration
+      yield self
       self
     end
 
+    def provider(name, &factory) = @providers[name.to_s] = factory
+    def setup(name, &block) = @setups[name.to_s] = block
+    def input(&factory) = @factories[:input] = factory
+    def output(&factory) = @factories[:output] = factory
+
     def build_provider(name, **)
       @plugins.load!
-      @registration.providers.fetch(name.to_s) { require_gem(name) }.call(**)
+      @providers.fetch(name.to_s) { require_gem(name) }.call(**)
     end
 
     def apply(session)
       @plugins.load!
-      @registration.setups.each_value { |block| block.call(session) }
+      @setups.each_value { |block| block.call(session) }
     end
 
     def reload(session)
@@ -30,31 +37,24 @@ module Elelem
     end
 
     def names
-      @registration.providers.keys
+      @providers.keys
     end
 
     def build_session(provider, toolbox: Toolbox.new, input: nil, output: nil, provider_options: {},
                       template: nil, system_prompt: nil)
       commands = Commands.new
-      agent = Agent.new(build_provider(provider, **provider_options), toolbox: toolbox, output: output || build_output,
-                                                                      template: template, system_prompt: system_prompt)
-      session = Session.new(agent, input: input || build_input(commands: commands), commands: commands)
+      agent = Agent.new(build_provider(provider, **provider_options), toolbox:, template:, system_prompt:,
+                                                                      output: output || @factories[:output].call)
+      session = Session.new(agent, input: input || @factories[:input].call(commands: commands), commands: commands)
       apply(session)
       session
     end
 
     private
 
-    def build_input(**) = build(:input, Input, **)
-    def build_output = build(:output, Builtins::Terminal)
-
-    def build(kind, klass, **)
-      (@registration.factories[kind] || klass.method(:new)).call(**)
-    end
-
     def require_gem(name)
       require "elelem/#{name}"
-      @registration.providers.fetch(name.to_s) { raise "elelem-#{name} did not register provider #{name.inspect}" }
+      @providers.fetch(name.to_s) { raise "elelem-#{name} did not register provider #{name.inspect}" }
     rescue LoadError => e
       raise unless e.path == "elelem/#{name}"
 

@@ -125,16 +125,33 @@ RSpec.describe Elelem::Registry do
 
     it "is the default" do
       registry = described_class.new(plugins: core_plugins)
+      registry.configure { |c| c.provider(:test) { double("provider") } }
 
-      expect(registry.send(:build_output)).to be_a(Elelem::Builtins::Terminal)
+      expect(registry.build_session("test", input: Elelem::NullInput.new).output).to be_a(Elelem::Builtins::Terminal)
     end
 
     it "is a fallback: an output a gem registered first still wins after plugins load" do
       gem_output = Object.new
       registry = described_class.new(plugins: core_plugins)
-      registry.configure { |c| c.output { gem_output } }
+      registry.configure do |c|
+        c.provider(:test) { double("provider") }
+        c.output { gem_output }
+      end
 
-      expect(registry.send(:build_output)).to be(gem_output)
+      expect(registry.build_session("test", input: Elelem::NullInput.new).output).to be(gem_output)
     end
+  end
+
+  it "builds input from a registered factory, given the session's commands" do
+    seen = nil
+    registry = described_class.new(plugins: Elelem::Plugins.new(load_paths: []))
+    registry.configure do |c|
+      c.provider(:test) { double("provider") }
+      c.input { |commands:| seen = commands }
+    end
+
+    session = registry.build_session("test", output: Elelem::NullOutput.new)
+
+    expect(seen).to be(session.commands)
   end
 end

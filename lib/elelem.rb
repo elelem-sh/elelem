@@ -30,7 +30,6 @@ require_relative "elelem/session"
 require_relative "elelem/repl"
 require_relative "elelem/stub_provider"
 require_relative "elelem/plugins"
-require_relative "elelem/registration"
 require_relative "elelem/registry"
 require_relative "elelem/config"
 
