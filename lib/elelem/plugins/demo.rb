@@ -6,7 +6,7 @@ module Elelem
       return yield(type: "saying", text: install_hint) unless shell?(tools)
       return yield(type: "saying", text: report(messages.last)) if messages.last[:role] == "tool"
 
-      run(first_line_of_last_prompt(messages), id: "demo-#{messages.length}", &)
+      use(*tool_for(first_line_of_last_prompt(messages)), id: "demo-#{messages.length}", &)
     end
 
     private
@@ -19,16 +19,20 @@ module Elelem
       prompt[:content].to_s.lines.first.to_s.strip
     end
 
-    def run(command, id:)
-      yield(type: "thinking", text: "I'll run `#{command}`.")
-      yield(type: "doing", id: id, name: "execute", arguments: { "command" => command })
+    def tool_for(line)
+      line.start_with?("@") ? ["read", { "path" => line.delete_prefix("@") }] : ["execute", { "command" => line }]
+    end
+
+    def use(name, arguments, id:)
+      yield(type: "thinking", text: "I'll #{name} `#{arguments.values.first}`.")
+      yield(type: "doing", id: id, name: name, arguments: arguments)
     end
 
     def report(tool_message)
       result = JSON.parse(tool_message[:content])
-      return result["error"] unless result.key?("exit_status")
+      return result["error"] if result["error"]
 
-      "exit #{result["exit_status"]}"
+      result.key?("exit_status") ? "exit #{result["exit_status"]}" : "read #{result["path"]}"
     end
   end
 end

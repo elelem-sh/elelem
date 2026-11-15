@@ -19,8 +19,21 @@ RSpec.describe "the demo provider" do
   it "runs what you type as a shell command" do
     events = events_for(prompt("ls -la"))
 
-    expect(events.first).to eq(type: "thinking", text: "I'll run `ls -la`.")
+    expect(events.first).to eq(type: "thinking", text: "I'll execute `ls -la`.")
     expect(events.last).to include(type: "doing", name: "execute", arguments: { "command" => "ls -la" })
+  end
+
+  it "reads @path with the read tool" do
+    events = events_for(prompt("@README.md"))
+
+    expect(events.first).to eq(type: "thinking", text: "I'll read `README.md`.")
+    expect(events.last).to include(type: "doing", name: "read", arguments: { "path" => "README.md" })
+  end
+
+  it "says which file it read" do
+    session = Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: Elelem::NullOutput.new)
+
+    expect(session.turn("@README.md")).to eq("read README.md")
   end
 
   it "runs only x for `cat file | elelem ask x`" do
