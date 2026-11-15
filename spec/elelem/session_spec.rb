@@ -37,10 +37,6 @@ RSpec.describe Elelem::Session do
     expect(session.conversation).to eq(agent.conversation)
   end
 
-  it "delegates context to the agent" do
-    expect(session.context).to eq(agent.context)
-  end
-
   it "delegates turn to the agent" do
     allow(agent).to receive(:turn).with("hello").and_return("hi")
 

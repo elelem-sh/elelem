@@ -3,7 +3,7 @@
 Elelem.configure do |config|
   config.setup(:context) do |agent|
     agent.commands.register("context", description: "Show conversation context") do |args|
-      messages = agent.context
+      messages = agent.conversation.to_a
 
       case args
       when nil, ""

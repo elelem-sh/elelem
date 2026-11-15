@@ -22,8 +22,8 @@ RSpec.describe Elelem::Conversation do
       expect { subject.add(role: "assistant", content: "test") }.not_to raise_error
     end
 
-    it "accepts tool role" do
-      expect { subject.add(role: "tool", content: "test") }.not_to raise_error
+    it "rejects tool role, since tool calls stay in the turn" do
+      expect { subject.add(role: "tool", content: "test") }.to raise_error(ArgumentError, /invalid role/)
     end
   end
 

@@ -49,7 +49,6 @@ module Elelem
     def build_output = build(:output, Builtins::Terminal)
 
     def build(kind, klass, **)
-      @plugins.load!
       (@registration.factories[kind] || klass.method(:new)).call(**)
     end
 

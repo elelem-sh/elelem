@@ -2,7 +2,7 @@
 
 module Elelem
   class Conversation
-    ROLES = %w[user assistant tool].freeze
+    ROLES = %w[user assistant].freeze
 
     def initialize(template: nil, system_prompt: nil)
       @messages = []
@@ -10,10 +10,10 @@ module Elelem
       @system_prompt = system_prompt
     end
 
-    def add(role:, content:, **extra)
+    def add(role:, content:)
       raise ArgumentError, "invalid role: #{role}" unless ROLES.include?(role)
 
-      @messages << { role: role, content: content, **extra }.compact
+      @messages << { role: role, content: content }
     end
 
     def last = @messages.last

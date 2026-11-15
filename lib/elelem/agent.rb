@@ -12,10 +12,6 @@ module Elelem
       @conversation = Conversation.new(template: template, system_prompt: system_prompt)
     end
 
-    def context
-      @conversation.to_a
-    end
-
     def turn(prompt)
       @conversation.add(role: "user", content: prompt)
       content = run_until_done([])

@@ -6,7 +6,7 @@ module Elelem
 
     attr_reader :agent, :input, :commands
 
-    def_delegators :@agent, :provider, :provider=, :toolbox, :output, :conversation, :context, :turn
+    def_delegators :@agent, :provider, :provider=, :toolbox, :output, :conversation, :turn
 
     def initialize(agent, input: NullInput.new, commands: Commands.new)
       @agent = agent

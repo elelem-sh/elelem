@@ -6,8 +6,8 @@ module Elelem
 
     Command = Struct.new(:description, :completions, :handler)
 
-    def initialize(registry = {})
-      @registry = registry
+    def initialize
+      @registry = {}
     end
 
     def clear!
