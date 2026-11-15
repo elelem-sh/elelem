@@ -35,22 +35,10 @@ require_relative "elelem/registry"
 require_relative "elelem/config"
 
 module Elelem
-  def self.start(provider: "stub", toolbox: Toolbox.new, provider_options: {}, template: nil, system_prompt: nil)
-    Repl.new(build(provider: provider, toolbox: toolbox, provider_options: provider_options, template: template,
-                   system_prompt: system_prompt)).run
-  end
-
-  def self.ask(prompt, provider: "stub", toolbox: Toolbox.new, output: NullOutput.new, provider_options: {},
-               template: nil, system_prompt: nil)
-    build(provider: provider, toolbox: toolbox, input: NullInput.new, output: output,
-          provider_options: provider_options, template: template, system_prompt: system_prompt).turn(prompt)
-  end
-
-  def self.build(provider: "stub", toolbox: Toolbox.new, input: nil, output: nil, provider_options: {},
-                 template: nil, system_prompt: nil)
-    Config.build_session(provider, toolbox: toolbox, input: input, output: output,
-                                   provider_options: provider_options, template: template, system_prompt: system_prompt)
-  end
+  # Options: toolbox:, input:, output:, provider_options:, template:, system_prompt:.
+  def self.build(provider: "stub", **) = Config.build_session(provider, **)
+  def self.start(**) = Repl.new(build(**)).run
+  def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)
 
   def self.logger
     @logger ||= Logger.new($stderr).tap do |log|

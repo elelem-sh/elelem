@@ -47,27 +47,22 @@ module Elelem
 
     private
 
-    def build_input(**)
-      @plugins.load!
-      (@registration.factories[:input] || ->(**o) { Input.new(**o) }).call(**)
-    end
+    def build_input(**) = build(:input, Input, **)
+    def build_output = build(:output, Output)
 
-    def build_output(**)
+    # A plugin's factory, else core's class.
+    def build(kind, klass, **)
       @plugins.load!
-      (@registration.factories[:output] || ->(**o) { Output.new(**o) }).call(**)
+      (@registration.factories[kind] || klass.method(:new)).call(**)
     end
 
     def require_gem(name)
       require "elelem/#{name}"
-      @registration.providers.fetch(name.to_s) { unregistered_provider(name) }
+      @registration.providers.fetch(name.to_s) { raise "elelem-#{name} did not register provider #{name.inspect}" }
     rescue LoadError => e
       raise unless e.path == "elelem/#{name}"
 
       raise "unknown provider: #{name.inspect}. Available: #{names.join(", ")}. Run: gem install elelem-#{name}"
-    end
-
-    def unregistered_provider(name)
-      raise "elelem-#{name} did not register a provider named #{name.inspect}"
     end
   end
 end

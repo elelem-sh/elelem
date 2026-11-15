@@ -2,23 +2,12 @@
 
 Elelem.configure do |config|
   config.setup(:tools) do |agent|
-    describe = lambda do |tool|
-      parameters = tool.to_h.dig(:function, :parameters)
-      lines = ["## #{tool.name}", "", tool.description, "", "### Parameters", ""]
-      parameters[:properties].each do |param, spec|
-        req = parameters[:required].include?(param.to_s) ? ", required" : ""
-        desc = spec[:description] ? " - #{spec[:description]}" : ""
-        lines << "- `#{param}` (#{spec[:type]}#{req})#{desc}"
-      end
-      lines << "" << "*aliases: #{tool.aliases.join(", ")}*" if tool.aliases.any?
-      lines.join("\n")
-    end
-
     completions = -> { agent.toolbox.tools.keys }
     agent.commands.register("tools", description: "List available tools", completions: completions) do |arg|
       tool = agent.toolbox.tools[arg] if arg && !arg.empty?
       if tool
-        agent.output.say describe.call(tool), as: :markdown
+        # What the model is sent, plus the aliases it may call instead.
+        agent.output.say JSON.pretty_generate(tool.to_h[:function].merge(aliases: tool.aliases)), as: :markdown
       elsif arg && !arg.empty?
         agent.output.say "Unknown tool: #{arg}"
       else

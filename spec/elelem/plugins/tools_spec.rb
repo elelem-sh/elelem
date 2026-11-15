@@ -22,17 +22,13 @@ RSpec.describe "the /tools command" do
     expect(said.last).to include("| greet | Greets someone. |", "| plain | Plain. |")
   end
 
-  it "describes one tool: name, description, params and aliases" do
+  it "describes one tool as the model sees it, with its aliases" do
     session.commands.run("tools", "greet")
 
-    expect(said.last).to include("## greet", "Greets someone.\nMore detail.",
-                                 "- `name` (string, required) - who to greet", "*aliases: hi*")
-  end
-
-  it "omits the aliases line when there are none" do
-    session.commands.run("tools", "plain")
-
-    expect(said.last).not_to include("aliases:")
+    described = JSON.parse(said.last.delete_prefix("```\n").delete_suffix("\n```\n"))
+    expect(described).to include("name" => "greet", "description" => "Greets someone.\nMore detail.",
+                                 "aliases" => ["hi"])
+    expect(described.dig("parameters", "required")).to eq(["name"])
   end
 
   it "says when a tool is unknown" do

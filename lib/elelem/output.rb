@@ -2,12 +2,6 @@
 
 module Elelem
   class Output
-    RENDERERS = {
-      error: ->(text) { "error: #{text}" },
-      markdown: ->(text) { "```\n#{text}\n```\n" }
-    }.freeze
-    private_constant :RENDERERS
-
     def initialize(stream: $stdout, **)
       @stream = stream
     end
@@ -41,7 +35,11 @@ module Elelem
     private
 
     def render(text, as)
-      RENDERERS[as]&.call(text) || text
+      case as
+      when :error then "error: #{text}"
+      when :markdown then "```\n#{text}\n```\n"
+      else text
+      end
     end
 
     def write(text)
