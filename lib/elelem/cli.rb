@@ -54,9 +54,13 @@ module Elelem
       abort "Usage: elelem ask <prompt>" if @args.empty?
 
       piped = !$stdout.tty?
-      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: Output.new(stream: piped ? $stderr : $stdout),
+      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: progress_output(piped),
                                          provider_options: @provider_options, system_prompt: @system_prompt)
       print_reply(reply, piped: piped)
+    end
+
+    def progress_output(piped)
+      Output.new(stream: $stderr) if piped
     end
 
     def prompt_for_ask

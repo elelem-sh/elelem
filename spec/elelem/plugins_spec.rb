@@ -54,6 +54,13 @@ RSpec.describe Elelem::Plugins do
     expect { plugins.load! }.to output(/failed to load plugin/).to_stderr
   end
 
+  it "logs a plugin that fails to load" do
+    File.write(File.join(plugin_dir, "broken.rb"), 'raise "kaboom"')
+
+    expect { plugins.load! }.to output(/kaboom/).to_stderr
+    expect(File.read(File.join(Elelem.state_dir, "elelem.log"))).to match(/WARN.*plugins: .*broken.rb: kaboom/)
+  end
+
   it "warns and continues when a plugin has a syntax error" do
     File.write(File.join(plugin_dir, "broken.rb"), "def broken(")
 

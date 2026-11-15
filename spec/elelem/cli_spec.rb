@@ -61,6 +61,28 @@ RSpec.describe Elelem::CLI do
     end
   end
 
+  it "shows progress through the configured output at a terminal" do
+    seen = nil
+    allow(Elelem).to receive(:ask) { |*, **options| seen = options }
+    allow($stdout).to receive(:tty?).and_return(true)
+
+    described_class.new(%w[ask hello]).run
+
+    expect(seen).to include(output: nil)
+  end
+
+  it "shows progress as plain text on stderr when stdout is piped" do
+    seen = nil
+    allow(Elelem).to receive(:ask) do |*, **options|
+      seen = options
+      "hi"
+    end
+    allow($stdout).to receive(:tty?).and_return(false)
+
+    expect { described_class.new(%w[ask hello]).run }.to output("hi\n").to_stdout
+    expect(seen[:output].instance_variable_get(:@stream)).to be($stderr)
+  end
+
   it "prints a piped reply as plain text, not a code fence" do
     expect { described_class.new([]).send(:print_reply, "hello", piped: true) }.to output("hello\n").to_stdout
   end

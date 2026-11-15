@@ -32,6 +32,7 @@ module Elelem
       load(file)
     rescue StandardError, ScriptError => e
       $stderr.puts "elelem: failed to load plugin #{file}: #{e.message}"
+      Elelem.logger.warn("plugins: #{file}: #{e.message}\n#{e.backtrace.join("\n")}")
     end
   end
 end
