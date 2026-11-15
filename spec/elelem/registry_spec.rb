@@ -73,13 +73,16 @@ RSpec.describe Elelem::Registry do
   end
 
   describe "#reload" do
-    it "clears existing setups and toolbox/commands, then reloads plugins and reapplies" do
-      plugins = instance_double(Elelem::Plugins)
+    it "drops plugin-file setups, keeps gem setups, clears toolbox/commands, then reloads and reapplies" do
+      plugins = instance_double(Elelem::Plugins, dirs: [__dir__])
       registry = described_class.new(plugins: plugins)
 
-      calls = 0
-      registry.configure { |c| c.setup(:stale) { calls += 1 } }
-      allow(plugins).to receive(:load!) { registry.configure { |c| c.setup(:fresh) { calls += 1 } } }
+      calls = []
+      registry.configure { |c| c.setup(:stale) { calls << :stale } }
+      gem_setup = proc { calls << :gem }
+      allow(gem_setup).to receive(:source_location).and_return(["/gems/elelem-tools/lib/elelem/tools.rb", 1])
+      registry.configure { |c| c.setup(:gem, &gem_setup) }
+      allow(plugins).to receive(:load!) { registry.configure { |c| c.setup(:fresh) { calls << :fresh } } }
 
       toolbox = instance_double(Elelem::Toolbox, clear!: nil)
       commands = instance_double(Elelem::Commands, clear!: nil)
@@ -90,7 +93,7 @@ RSpec.describe Elelem::Registry do
       expect(toolbox).to have_received(:clear!)
       expect(commands).to have_received(:clear!)
       expect(plugins).to have_received(:load!).with(force: true)
-      expect(calls).to eq(1)
+      expect(calls).to contain_exactly(:gem, :fresh)
     end
 
     it "preserves provider factories across reload" do

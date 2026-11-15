@@ -30,8 +30,13 @@ module Elelem
       self
     end
 
-    def clear_setups!
-      @setups.clear
+    # Drops setups defined in files under dirs. Gem setups are kept, since
+    # require will not run them again.
+    def clear_setups_from!(dirs)
+      @setups.reject! do |_, block|
+        file = block.source_location&.first.to_s
+        dirs.any? { |dir| file.start_with?("#{dir}/") }
+      end
     end
   end
 end
