@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative "builtins/command"
+require_relative "builtins/terminal"
+
 module Elelem
   module Builtins
     def self.sh(cmd, args: [], cwd: Dir.pwd, env: {}, timeout: nil, &)
