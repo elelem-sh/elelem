@@ -29,10 +29,10 @@ RSpec.describe "the demo provider" do
     expect(events.last[:arguments]).to eq("command" => "x")
   end
 
-  it "says the exit status and the output of the command" do
+  it "says the exit status, since the output was already shown" do
     events = events_for(after(exit_status: 3, content: "a.txt\n", ok: false, error: "exit 3"))
 
-    expect(events).to eq([{ type: "saying", text: "exit 3\n\na.txt" }])
+    expect(events).to eq([{ type: "saying", text: "exit 3" }])
   end
 
   it "says the error when the command never ran" do
@@ -51,7 +51,7 @@ RSpec.describe "the demo provider" do
   it "drives a full turn: runs the command once, then replies" do
     session = Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: Elelem::NullOutput.new)
 
-    expect(session.turn("echo hi\n\n```\nexit 1\n```")).to eq("exit 0\n\nhi")
+    expect(session.turn("echo hi\n\n```\nexit 1\n```")).to eq("exit 0")
   end
 
   it "reloads without warnings" do

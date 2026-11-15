@@ -28,7 +28,7 @@ module Elelem
       result = JSON.parse(tool_message[:content])
       return result["error"] unless result.key?("exit_status")
 
-      "exit #{result["exit_status"]}\n\n#{result["content"].to_s.chomp}"
+      "exit #{result["exit_status"]}"
     end
   end
 end
