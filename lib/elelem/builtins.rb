@@ -2,35 +2,8 @@
 
 module Elelem
   module Builtins
-    def self.sh(cmd, args: [], cwd: Dir.pwd, env: {}, timeout: nil)
-      output = StringIO.new
-      options = { chdir: cwd }
-      options[:pgroup] = true if timeout
-
-      Open3.popen2e(env, cmd, *args, **options) do |stdin, out, wait_thr|
-        stdin.close
-        timed_out = false
-        watchdog = timeout && Thread.new do
-          sleep(timeout)
-          timed_out = true
-          terminate(wait_thr.pid)
-        end
-
-        out.each_line do |line|
-          line = line.force_encoding(Encoding::UTF_8).scrub
-          yield line if block_given?
-          output.write(line)
-        end
-        timed_out ? watchdog&.join : watchdog&.kill
-
-        status = wait_thr.value
-        note = timed_out ? "\n[command timed out after #{timeout}s]" : ""
-        { exit_status: status.exitstatus || (timed_out ? 124 : 1), content: truncate(output.string) + note }
-      rescue Interrupt, SystemExit
-        # In its own process group the command never sees Ctrl-C, so stop it here.
-        terminate(wait_thr.pid) if timeout
-        raise
-      end
+    def self.sh(cmd, args: [], cwd: Dir.pwd, env: {}, timeout: nil, &)
+      Command.new(timeout).run(env, [cmd, *args], cwd, &)
     end
 
     def self.truncate(content, limit: 10_000)
@@ -48,5 +21,65 @@ module Elelem
     rescue Errno::ESRCH
       nil
     end
+
+    class Command
+      def initialize(timeout)
+        @timeout = timeout
+        @timed_out = false
+        @output = StringIO.new
+      end
+
+      def run(env, argv, cwd, &)
+        Open3.popen2e(env, *argv, **spawn_options(cwd)) do |stdin, out, process|
+          stdin.close
+          stop_on_interrupt(process.pid) { finish(process, out, &) }
+        end
+      end
+
+      private
+
+      def spawn_options(cwd)
+        @timeout ? { chdir: cwd, pgroup: true } : { chdir: cwd }
+      end
+
+      def stop_on_interrupt(pid)
+        yield
+      rescue Interrupt, SystemExit
+        Builtins.terminate(pid) if @timeout
+        raise
+      end
+
+      def finish(process, out, &)
+        watchdog = start_watchdog(process.pid)
+        stream_lines(out, &)
+        @timed_out ? watchdog.join : watchdog&.kill
+        { exit_status: exit_status(process.value), content: Builtins.truncate(@output.string) + timeout_note }
+      end
+
+      def start_watchdog(pid)
+        @timeout && Thread.new do
+          sleep(@timeout)
+          @timed_out = true
+          Builtins.terminate(pid)
+        end
+      end
+
+      def stream_lines(out)
+        out.each_line do |line|
+          line = line.force_encoding(Encoding::UTF_8).scrub
+          yield line if block_given?
+          @output.write(line)
+        end
+      end
+
+      def exit_status(status)
+        status.exitstatus || (@timed_out ? 124 : 1)
+      end
+
+      def timeout_note
+        @timed_out ? "\n[command timed out after #{@timeout}s]" : ""
+      end
+    end
+    private_constant :Command
   end
 end

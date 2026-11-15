@@ -18,4 +18,11 @@ RSpec.describe Elelem::Builtins do
     end.to raise_error(SystemExit)
     expect(Process.clock_gettime(Process::CLOCK_MONOTONIC) - started).to be < 5
   end
+
+  it "stops a command that runs past its timeout and says so" do
+    result = described_class.sh("bash", args: ["-c", "echo hi; sleep 10"], timeout: 1)
+
+    expect(result[:exit_status]).to eq(124)
+    expect(result[:content]).to eq("hi\n\n[command timed out after 1s]")
+  end
 end

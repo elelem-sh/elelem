@@ -7,10 +7,36 @@ AllCops:
     - "bin/**/*"
     - "vendor/**/*"
 
-Metrics/ClassLength:
-  Max: 100
+Layout/LineLength:
+  Max: 120
 
-Metrics/ModuleLength:
+Lint/EmptyBlock:
+  Exclude:
+    - "spec/**/*"
+
+Lint/RedundantRequireStatement:
+  Enabled: false
+
+Lint/UnusedBlockArgument:
+  IgnoreEmptyBlocks: true
+  AllowUnusedKeywordArguments: true
+
+Lint/UselessDefaultValueArgument:
+  Enabled: false
+
+Metrics:
+  Exclude:
+    - "lib/elelem/plugins/**/*"
+
+Metrics/AbcSize:
+  Max: 15
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+    - "*.gemspec"
+
+Metrics/ClassLength:
   Max: 100
 
 Metrics/MethodLength:
@@ -21,44 +47,17 @@ Metrics/MethodLength:
     - heredoc
     - method_call
 
-Naming/PredicateMethod:
-  AllowedMethods:
-    - call
-    - run
+Metrics/ModuleLength:
+  Max: 100
 
 Metrics/ParameterLists:
   Max: 4
   CountKeywordArgs: false
 
-Metrics/AbcSize:
-  Max: 15
-
-Metrics/BlockLength:
-  Exclude:
-    - "spec/**/*"
-    - "*.gemspec"
-
-# exe/elelem runs with -W0, which silences Kernel#warn.
-Style/StderrPuts:
-  Enabled: false
-
-Style/GlobalVars:
-  Exclude:
-    - "spec/**/*"
-
-Lint/EmptyBlock:
-  Exclude:
-    - "spec/**/*"
-
-Lint/UselessDefaultValueArgument:
-  Enabled: false
-
-Lint/RedundantRequireStatement:
-  Enabled: false
-
-Lint/UnusedBlockArgument:
-  IgnoreEmptyBlocks: true
-  AllowUnusedKeywordArguments: true
+Naming/PredicateMethod:
+  AllowedMethods:
+    - call
+    - run
 
 Style/Documentation:
   Enabled: false
@@ -66,18 +65,15 @@ Style/Documentation:
 Style/FrozenStringLiteralComment:
   Enabled: true
 
+Style/GlobalVars:
+  Exclude:
+    - "spec/**/*"
+
+Style/StderrPuts:
+  Enabled: false
+
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
-
-Layout/LineLength:
-  Max: 120
-
-# Moved from elelem-builtins, which did not enforce size metrics.
-Metrics:
-  Exclude:
-    - "lib/elelem/builtins.rb"
-    - "lib/elelem/builtins/**/*"
-    - "lib/elelem/plugins/**/*"
