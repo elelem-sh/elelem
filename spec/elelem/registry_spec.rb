@@ -86,15 +86,12 @@ RSpec.describe Elelem::Registry do
   end
 
   describe "#reload" do
-    it "drops plugin-file setups, keeps gem setups, clears toolbox/commands, then reloads and reapplies" do
-      plugins = instance_double(Elelem::Plugins, dirs: [__dir__])
+    it "clears toolbox and commands, force-loads plugins, then reapplies every setup" do
+      plugins = instance_double(Elelem::Plugins)
       registry = described_class.new(plugins: plugins)
 
       calls = []
-      registry.configure { |c| c.setup(:stale) { calls << :stale } }
-      gem_setup = proc { calls << :gem }
-      allow(gem_setup).to receive(:source_location).and_return(["/gems/elelem-tools/lib/elelem/tools.rb", 1])
-      registry.configure { |c| c.setup(:gem, &gem_setup) }
+      registry.configure { |c| c.setup(:gem) { calls << :gem } }
       allow(plugins).to receive(:load!) { registry.configure { |c| c.setup(:fresh) { calls << :fresh } } }
 
       toolbox = instance_double(Elelem::Toolbox, clear!: nil)

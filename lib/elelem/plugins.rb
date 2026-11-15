@@ -16,12 +16,8 @@ module Elelem
     def load!(force: false)
       return if @loaded && !force
 
-      dirs.each { |dir| load_dir(dir) }
+      @load_paths.each { |path| load_dir(File.expand_path(path)) }
       @loaded = true
-    end
-
-    def dirs
-      @load_paths.map { |path| File.expand_path(path) }
     end
 
     private

@@ -23,7 +23,6 @@ module Elelem
     end
 
     def reload(session)
-      @registration.clear_setups_from!(@plugins.dirs)
       session.toolbox.clear!
       session.commands.clear!
       @plugins.load!(force: true)
