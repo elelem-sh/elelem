@@ -5,7 +5,7 @@
 
 ### Features
 
-* the demo reads [@path](https://github.com/path) with the read tool ([e6a1ab5](https://github.com/elelem-sh/elelem/commit/e6a1ab5529bc510efb178e3a2cd6cf986d391dbf))
+* the demo reads `@path` with the read tool ([e6a1ab5](https://github.com/elelem-sh/elelem/commit/e6a1ab5529bc510efb178e3a2cd6cf986d391dbf))
 * the demo reads any file you name that is not executable ([7b52d42](https://github.com/elelem-sh/elelem/commit/7b52d4291bc7c8d51a90f1230f0a6b28939c8e98))
 
 
