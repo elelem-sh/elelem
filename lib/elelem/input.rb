@@ -37,8 +37,7 @@ module Elelem
     end
 
     def complete_files(target)
-      output, = Open3.capture2("bash", "-c", "compgen -f #{Shellwords.escape(target)}")
-      output.lines.map(&:strip).first(20)
+      Dir["#{target}*"].first(20)
     end
   end
 end

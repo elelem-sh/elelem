@@ -9,7 +9,6 @@ require "json_schemer"
 require "logger"
 require "open3"
 require "pathname"
-require "shellwords"
 require "stringio"
 require "tempfile"
 
