@@ -18,7 +18,6 @@ module Elelem
       @registry[name] = Command.new(description, completions, handler)
     end
 
-    # completions is a list, or a lambda that returns one.
     def completions_for(name, partial = "")
       options = @registry[name]&.completions || []
       options = options.call if options.respond_to?(:call)

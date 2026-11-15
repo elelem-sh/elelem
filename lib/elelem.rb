@@ -35,7 +35,6 @@ require_relative "elelem/registry"
 require_relative "elelem/config"
 
 module Elelem
-  # Options: toolbox:, input:, output:, provider_options:, template:, system_prompt:.
   def self.build(provider: "stub", **) = Config.build_session(provider, **)
   def self.start(**) = Repl.new(build(**)).run
   def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)

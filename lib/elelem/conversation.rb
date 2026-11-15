@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Elelem
-  # The messages of a session, behind the system prompt they are sent with.
   class Conversation
     ROLES = %w[user assistant tool].freeze
 
@@ -20,9 +19,8 @@ module Elelem
     def last = @messages.last
     def clear! = @messages.clear
 
-    # The system prompt, the messages, then extra: the tool calls of a turn.
     def to_a(extra = [])
-      # The role text is the model's own words, so it is never run as ERB.
+      # The role text is the user's --system-prompt text, so it is never run as ERB.
       system = [@system_prompt, @template.render].compact.join("\n\n")
       [{ role: "system", content: system }, *@messages, *extra]
     end

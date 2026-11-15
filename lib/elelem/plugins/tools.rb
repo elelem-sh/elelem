@@ -6,7 +6,6 @@ Elelem.configure do |config|
     agent.commands.register("tools", description: "List available tools", completions: completions) do |arg|
       tool = agent.toolbox.tools[arg] if arg && !arg.empty?
       if tool
-        # What the model is sent, plus the aliases it may call instead.
         agent.output.say JSON.pretty_generate(tool.to_h[:function].merge(aliases: tool.aliases)), as: :markdown
       elsif arg && !arg.empty?
         agent.output.say "Unknown tool: #{arg}"

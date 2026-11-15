@@ -23,7 +23,7 @@ Elelem.configure do |config|
         agent.output.print(diff)
       end
     rescue Errno::ENOENT
-      nil # no diff installed
+      nil
     end
 
     agent.toolbox.after("write") do |_, result|

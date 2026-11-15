@@ -16,7 +16,6 @@ module Elelem
       @conversation.to_a
     end
 
-    # A provider error leaves the turn: the caller decides how to report it.
     def turn(prompt)
       @conversation.add(role: "user", content: prompt)
       content = run_until_done([])
@@ -26,8 +25,6 @@ module Elelem
 
     private
 
-    # Tool calls and their results stay out of the conversation: only the
-    # prompt and the final reply are kept.
     def run_until_done(ctx)
       loop do
         content, tool_calls = fetch(ctx)

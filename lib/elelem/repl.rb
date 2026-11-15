@@ -15,9 +15,6 @@ module Elelem
 
     private
 
-    # Only lines typed at the prompt go in history, not answers to a tool.
-    # A line is a command only when its first word names one, so a path such
-    # as /etc/hosts reaches the model. One failed turn does not end the session.
     def dispatch_line(line)
       @session.input.remember(line) if @session.input.respond_to?(:remember)
       command(line) || @session.turn(line)

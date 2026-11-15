@@ -4,7 +4,6 @@ module Elelem
   class Tool
     attr_reader :name, :description, :aliases
 
-    # params and required are JSON Schema; every call is checked against them.
     def initialize(name, description:, params: {}, required: [], aliases: [], &handler)
       @name = name
       @description = description

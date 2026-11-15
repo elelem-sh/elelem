@@ -27,7 +27,6 @@ module Elelem
       @hooks[:after][tool_name] << block
     end
 
-    # The tool by name, else by alias, so a real tool named like an alias wins.
     def tool_for(name)
       tools[name] || tools[@aliases[name]]
     end

@@ -48,7 +48,6 @@ module Elelem
     def build_input(**) = build(:input, Input, **)
     def build_output = build(:output, Builtins::Terminal)
 
-    # A plugin's factory, else core's class.
     def build(kind, klass, **)
       @plugins.load!
       (@registration.factories[kind] || klass.method(:new)).call(**)

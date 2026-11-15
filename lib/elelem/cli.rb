@@ -48,7 +48,6 @@ module Elelem
       Elelem.start(provider: @provider, provider_options: @provider_options, system_prompt: @system_prompt)
     end
 
-    # When stdout is piped, progress goes to stderr and only the reply to stdout.
     def ask
       abort "Usage: elelem ask <prompt>" if @args.empty?
 
