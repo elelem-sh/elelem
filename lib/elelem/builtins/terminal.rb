@@ -63,11 +63,17 @@ module Elelem
       end
 
       def print_dots_until_stopped
+        sleep 0.1
         until Thread.current[:stop]
-          @stream.print "."
-          @stream.flush
+          print_dot
           sleep 0.1
         end
+      end
+
+      def print_dot
+        @stream.print "."
+        @stream.flush
+        @at_line_start = false
       end
 
       def gap
@@ -81,7 +87,7 @@ module Elelem
         @dots_thread[:stop] = true
         @dots_thread.join
         @dots_thread = nil
-        write("\n")
+        write("\n") unless @at_line_start
       end
 
       def write(text)

@@ -24,6 +24,21 @@ RSpec.describe Elelem::Builtins::Terminal do
     expect(File.read(file)).to eq("secret\n")
   end
 
+  it "shows no dots or blank line for a reply that comes at once" do
+    terminal.waiting
+    terminal.say("hi")
+
+    expect(stream.string).to eq("hi\n")
+  end
+
+  it "ends the dots with a line break before a slow reply" do
+    terminal.waiting
+    sleep 0.25
+    terminal.say("hi")
+
+    expect(stream.string).to match(/\A\.+\nhi\n\z/)
+  end
+
   it "says an error in ASCII" do
     terminal.say("boom", as: :error)
 
