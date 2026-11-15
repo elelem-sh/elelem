@@ -20,7 +20,7 @@ RSpec.describe "the execute tool" do
   it "is not ok when the command exits non-zero, and keeps the status" do
     result = session.toolbox.run("execute", { "command" => "exit 3" })
 
-    expect([result.ok?, result[:exit_status]]).to eq([false, 3])
+    expect([result.ok?, result[:exit_status], result[:error]]).to eq([false, 3, "exit 3"])
   end
 
   it "runs a command whose output is not UTF-8" do

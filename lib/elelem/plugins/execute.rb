@@ -7,12 +7,11 @@ Elelem.configure do |config|
                       params: { command: { type: "string" } },
                       required: ["command"],
                       aliases: ["bash", "sh", "exec", "execute<|channel|>"]) do |a|
-      # The timeout kills the whole process group, so `npm start &` cannot hang the session.
       value = ENV.fetch("ELELEM_CMD_TIMEOUT", "")
       timeout = value.empty? ? 300 : Integer(value)
       timeout = nil if timeout.zero?
       result = Elelem::Builtins.sh("bash", args: ["-c", a["command"]], timeout: timeout) { |x| agent.output.print(x) }
-      result.merge(ok: result[:exit_status].zero?)
+      result[:exit_status].zero? ? result : result.merge(error: "exit #{result[:exit_status]}")
     end
 
     agent.toolbox.after("execute") do |args, result|
