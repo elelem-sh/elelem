@@ -28,7 +28,10 @@ Elelem.configure do |config|
         agent.output.say "  ! #{result[:error]}"
       else
         agent.output.display_file(result[:path], fallback: "  -> #{result[:path]}")
-        agent.toolbox.run("verify", { "path" => result[:path] }) if agent.toolbox.tools.key?("verify")
+        # The model sees the checks in the write's own result.
+        if agent.toolbox.tools.key?("verify")
+          result[:verify] = agent.toolbox.run("verify", { "path" => result[:path] }).to_h
+        end
       end
     end
   end
