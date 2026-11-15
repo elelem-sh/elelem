@@ -23,3 +23,13 @@ RSpec.describe Elelem::NullOutput do
     expect(null_output).to respond_to(:say, :print, :thinking, :waiting, :doing, :display_file)
   end
 end
+
+RSpec.describe Elelem::Output do
+  it "prints the blank lines of streamed output" do
+    stream = StringIO.new
+    output = described_class.new(stream: stream)
+    ["# Title\n", "\n", "text\n"].each { |line| output.print(line) }
+
+    expect(stream.string).to eq("# Title\n\ntext\n")
+  end
+end

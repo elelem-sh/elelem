@@ -13,7 +13,7 @@ module Elelem
     end
 
     def print(text)
-      return if blank?(text)
+      return if text.to_s.empty?
 
       write text
     end
