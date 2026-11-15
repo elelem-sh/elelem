@@ -4,14 +4,13 @@ require "reline"
 
 module Elelem
   class Input
-    def initialize(commands: Commands.new)
+    def initialize(commands: Commands.new, stream: $stdin)
       @commands = commands
-      Reline.autocompletion = true
-      Reline.completion_proc = ->(target, preposing) { complete(target, preposing) }
+      @stream = stream
     end
 
     def ask(prompt)
-      Reline.readline(prompt, false)&.strip
+      (interactive? ? read_line(prompt) : @stream.gets)&.strip
     end
 
     def remember(line)
@@ -19,10 +18,16 @@ module Elelem
     end
 
     def interactive?
-      $stdin.tty?
+      @stream.tty?
     end
 
     private
+
+    def read_line(prompt)
+      Reline.autocompletion = true
+      Reline.completion_proc = ->(target, preposing) { complete(target, preposing) }
+      Reline.readline(prompt, false)
+    end
 
     def complete(target, preposing)
       line = "#{preposing}#{target}"

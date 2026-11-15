@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Elelem::Input do
+  it "reads a line from a stream that is not a terminal" do
+    input = described_class.new(stream: StringIO.new("ls -a\n"))
+
+    expect([input.interactive?, input.ask("> "), input.ask("> ")]).to eq([false, "ls -a", nil])
+  end
+
   it "completes file names without a shell" do
     allow(Open3).to receive(:capture2)
 

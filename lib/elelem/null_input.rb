@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module Elelem
-  class NullInput
-    def ask(_prompt) = nil
-    def interactive? = false
+  class NullInput < Input
+    def initialize(**)
+      super(stream: File.open(File::NULL))
+    end
   end
 end
