@@ -11,4 +11,14 @@ RSpec.describe Elelem::Input do
     end
     expect(Open3).not_to have_received(:capture2)
   end
+
+  it "completes glob characters literally, without walking the tree" do
+    Dir.mktmpdir do |dir|
+      File.write(File.join(dir, "a[1].txt"), "")
+      File.write(File.join(dir, "a1.txt"), "")
+
+      expect(described_class.new.send(:complete_files, "#{dir}/a[")).to eq(["#{dir}/a[1].txt"])
+      expect(described_class.new.send(:complete_files, "**")).to eq([])
+    end
+  end
 end

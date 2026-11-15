@@ -13,8 +13,9 @@ module Elelem
     end
 
     def turn(prompt)
-      @conversation.add(role: "user", content: prompt)
-      content = run_until_done([])
+      message = { role: "user", content: prompt }
+      content = run_until_done([message])
+      @conversation.add(**message)
       @conversation.add(role: "assistant", content: content)
       content
     end

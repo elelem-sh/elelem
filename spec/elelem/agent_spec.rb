@@ -25,7 +25,7 @@ RSpec.describe Elelem::Agent do
       expect { agent.turn("go") }.not_to raise_error
     end
 
-    it "lets a provider error leave the turn instead of replying with it" do
+    it "lets a provider error leave the turn, and keeps the conversation as it was" do
       broken_provider = Class.new do
         def fetch(*) = require("nope/not/real")
       end.new
@@ -33,7 +33,7 @@ RSpec.describe Elelem::Agent do
       agent = described_class.new(broken_provider, toolbox: Elelem::Toolbox.new)
 
       expect { agent.turn("go") }.to raise_error(LoadError)
-      expect(agent.conversation.last[:role]).to eq("user")
+      expect(agent.conversation.to_a.map { |m| m[:role] }).to eq(["system"])
     end
   end
 end

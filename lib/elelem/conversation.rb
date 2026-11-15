@@ -7,7 +7,7 @@ module Elelem
     def initialize(template: nil, system_prompt: nil)
       @messages = []
       @template = SystemPrompt.new(template)
-      @system_prompt = system_prompt
+      @role_text = system_prompt
     end
 
     def add(role:, content:)
@@ -20,8 +20,7 @@ module Elelem
     def clear! = @messages.clear
 
     def to_a(extra = [])
-      # The role text is the user's --system-prompt text, so it is never run as ERB.
-      system = [@system_prompt, @template.render].compact.join("\n\n")
+      system = [@role_text, @template.render].compact.join("\n\n")
       [{ role: "system", content: system }, *@messages, *extra]
     end
   end

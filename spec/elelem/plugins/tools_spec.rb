@@ -36,4 +36,13 @@ RSpec.describe "the /tools command" do
 
     expect(said.last).to eq("Unknown tool: nope")
   end
+
+  it "shows a tool by its alias" do
+    stream = StringIO.new
+    session = Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: Elelem::Output.new(stream:))
+
+    session.commands.run("tools", "bash")
+
+    expect(stream.string).to include('"name": "execute"')
+  end
 end

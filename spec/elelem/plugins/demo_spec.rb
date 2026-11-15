@@ -35,6 +35,12 @@ RSpec.describe "the demo provider" do
     expect(events).to eq([{ type: "saying", text: "exit 3\n\na.txt" }])
   end
 
+  it "says the error when the command never ran" do
+    events = events_for(after(ok: false, error: "unknown tool"))
+
+    expect(events).to eq([{ type: "saying", text: "unknown tool" }])
+  end
+
   it "says how to install a model when the session has no execute tool" do
     events = events_for(prompt("ls"), [])
 

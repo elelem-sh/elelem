@@ -37,7 +37,14 @@ module Elelem
     end
 
     def complete_files(target)
-      Dir["#{target}*"].first(20)
+      dir = target.include?("/") ? target[..target.rindex("/")] : ""
+      entries(dir).map { |name| "#{dir}#{name}" }.select { |path| path.start_with?(target) }.sort.first(20)
+    end
+
+    def entries(dir)
+      Dir.children(dir.empty? ? "." : dir)
+    rescue SystemCallError
+      []
     end
   end
 end
