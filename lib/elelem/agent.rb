@@ -36,6 +36,7 @@ module Elelem
     end
 
     def fetch(ctx)
+      output.waiting
       events = stream(ctx)
       content = events.filter_map { |e| e[:text] if e[:type] == "saying" }.join
       output.say(content, as: :markdown)
@@ -43,9 +44,10 @@ module Elelem
     end
 
     def stream(ctx)
-      output.waiting
       [].tap do |events|
-        provider.fetch(@conversation.to_a(ctx), toolbox.to_a) { |event| events << event.tap { show_thinking(it) } }
+        provider.fetch(@conversation.to_a(ctx), toolbox.to_a) do |event|
+          events << event.tap { show_thinking(it) }
+        end
       end
     end
 
