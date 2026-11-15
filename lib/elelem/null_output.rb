@@ -2,8 +2,8 @@
 
 module Elelem
   class NullOutput < Output
-    private
-
-    def write(_text) = nil
+    def initialize(**)
+      super(stream: File.open(File::NULL, "w"))
+    end
   end
 end
