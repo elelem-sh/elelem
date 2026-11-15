@@ -19,7 +19,7 @@ module Elelem
       @session.input.remember(line) if @session.input.respond_to?(:remember)
       command(line) || @session.turn(line)
     rescue StandardError, ScriptError => e
-      Elelem.logger.debug("repl: #{e.message}")
+      Elelem.logger.warn("repl: #{e.message}\n#{e.backtrace.join("\n")}")
       @session.output.say(e.message, as: :error)
     end
 

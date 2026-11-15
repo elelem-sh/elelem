@@ -95,7 +95,7 @@ module Elelem
       end
 
       def transcript_path
-        dir = File.join(ENV.fetch("XDG_STATE_HOME", File.expand_path("~/.local/state")), "elelem", "sessions")
+        dir = File.join(Elelem.state_dir, "sessions")
         FileUtils.mkdir_p(dir, mode: 0o700)
         File.chmod(0o700, dir)
         File.join(dir, "#{Time.now.utc.strftime("%Y%m%dT%H%M%SZ")}-#{Process.pid}.transcript")

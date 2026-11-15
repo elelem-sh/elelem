@@ -20,6 +20,17 @@ Dir[File.join(__dir__, "support/**/*.rb")].each { |f| require f }
 RSpec.configure do |config|
   config.disable_monkey_patching!
 
+  config.around do |example|
+    saved = ENV.fetch("XDG_STATE_HOME", nil)
+    Dir.mktmpdir do |dir|
+      ENV["XDG_STATE_HOME"] = dir
+      example.run
+    ensure
+      ENV["XDG_STATE_HOME"] = saved
+      Elelem.instance_variable_set(:@logger, nil)
+    end
+  end
+
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end

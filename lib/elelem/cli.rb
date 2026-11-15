@@ -27,7 +27,7 @@ module Elelem
       Signal.trap("INT") { exit 1 }
       dispatch(@args.shift || "chat")
     rescue StandardError, ScriptError => e
-      Elelem.logger.debug("cli: #{e.message}\n#{e.backtrace.join("\n")}")
+      Elelem.logger.warn("cli: #{e.message}\n#{e.backtrace.join("\n")}")
       abort "elelem: #{e.message}"
     end
 
@@ -66,7 +66,7 @@ module Elelem
 
     def print_reply(reply, piped:)
       abort "elelem: no reply" if reply.to_s.strip.empty?
-      $stdout.puts(reply) if piped
+      Output.new.say(reply) if piped
     end
   end
 end

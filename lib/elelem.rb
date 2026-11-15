@@ -38,11 +38,27 @@ module Elelem
   def self.start(**) = Repl.new(build(**)).run
   def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)
 
+  def self.state_dir
+    File.join(ENV.fetch("XDG_STATE_HOME", File.expand_path("~/.local/state")), "elelem")
+  end
+
   def self.logger
-    @logger ||= Logger.new($stderr).tap do |log|
+    @logger ||= Logger.new(log_device, 3, 1_048_576).tap do |log|
       log.level = Logger.const_get(ENV.fetch("ELELEM_LOG_LEVEL", "warn").upcase)
     end
   end
+
+  def self.log_device
+    ENV["ELELEM_LOG"] == "-" ? $stderr : log_file
+  end
+
+  def self.log_file
+    FileUtils.mkdir_p(state_dir, mode: 0o700)
+    File.join(state_dir, "elelem.log").tap { |path| File.write(path, "", mode: "a", perm: 0o600) }
+  rescue SystemCallError
+    $stderr
+  end
+  private_class_method :log_device, :log_file
 end
 
 Elelem.configure { |config| config.provider(:stub) { Elelem::StubProvider.new } }

@@ -35,7 +35,7 @@ module Elelem
       tool = tool_for(name)
       invalid(name, tool, args) || to_result(dispatch(tool, args))
     rescue StandardError, ScriptError => e
-      Elelem.logger.debug("toolbox: #{e.message}\n#{e.backtrace.join("\n")}")
+      Elelem.logger.warn("toolbox: #{e.message}\n#{e.backtrace.join("\n")}")
       Result.failure(error: e.message, name: name, args: args)
     end
 
