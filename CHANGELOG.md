@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.13.0](https://github.com/elelem-sh/elelem/compare/v0.12.0...v0.13.0) (2026-11-15)
+
+
+### Features
+
+* make the stub provider do what you type ([d5c5c0d](https://github.com/elelem-sh/elelem/commit/d5c5c0d9c5f4d272bf5155bcd7ec5c08d411fbf7))
+* merge elelem-builtins into core ([cd4fbdd](https://github.com/elelem-sh/elelem/commit/cd4fbddb3258b82866fc52a1cf4319ca8a7c2633))
+* the stub understands plain requests and reports like a model ([d6414ac](https://github.com/elelem-sh/elelem/commit/d6414acc263587ef90adafe8a1c29bc466894aa9))
+* thread provider options and split template/system_prompt (0.13.0) ([4f802f8](https://github.com/elelem-sh/elelem/commit/4f802f8c74918c0a1275e93fd5f90967a001ee8b))
+
+
+### Bug Fixes
+
+* /provider NAME [MODEL] keeps --model for the same provider (elelem-sh/elelem.sh[#19](https://github.com/elelem-sh/elelem/issues/19)) ([5bdc39d](https://github.com/elelem-sh/elelem/commit/5bdc39d184d38d729d7be80173f38aaadd07ea34))
+* /reload keeps setups registered by gems (elelem-sh/elelem.sh[#6](https://github.com/elelem-sh/elelem/issues/6)) ([4b5db79](https://github.com/elelem-sh/elelem/commit/4b5db79e2c566aa0ae36eebf9399fac74ee152b6))
+* /tools copies the tool list so tools added by a loading MCP server cannot break it ([8aee981](https://github.com/elelem-sh/elelem/commit/8aee98143af19525ab48211307510459d804e7db))
+* a load error inside an installed provider gem is reported as itself, not as a missing gem ([1de5ce5](https://github.com/elelem-sh/elelem/commit/1de5ce56d941bb46dfeb61a54d8440accf692bb2))
+* execute reports ok: false when the command exits non-zero (elelem-sh/elelem.sh[#20](https://github.com/elelem-sh/elelem/issues/20)) ([b94882b](https://github.com/elelem-sh/elelem/commit/b94882bfe0cfe8d555de25fbe8cc1a6c1a9aa26b))
+* harden read, execute, write and the repl, and fold single-use classes into their callers ([8e4b338](https://github.com/elelem-sh/elelem/commit/8e4b3387741e74d8d13e0842e6a5cd887dd904b2))
+* keep a gem's output instead of replacing it with the terminal ([2353eee](https://github.com/elelem-sh/elelem/commit/2353eee75961cc361c9f25c9eb60a7d6fbfcbbd6))
+* leave out missing stub arguments so a bare write cannot empty a file ([de12c55](https://github.com/elelem-sh/elelem/commit/de12c5504af6f295e4ead9855aea03e15cad1f7e))
+* print a piped ask reply as plain text, not a code fence ([fa10b15](https://github.com/elelem-sh/elelem/commit/fa10b1582a85f8fb2172862837f9ae7e438f7780))
+* return verify results to the model after a write (elelem-sh/elelem.sh[#3](https://github.com/elelem-sh/elelem/issues/3)) ([941ec7e](https://github.com/elelem-sh/elelem/commit/941ec7e4bcbc5d2c5c10e687b6f8393cb689238a))
+* show tool errors once without a backtrace and keep prompt answers out of history ([f9a8e8d](https://github.com/elelem-sh/elelem/commit/f9a8e8d32919d088508e168fd1d89986ec195f39))
+* the stub never writes to a word that is not a file name ([c5c311c](https://github.com/elelem-sh/elelem/commit/c5c311c3e4419bb4c0b320673456412bfb27d7a1))
+* the stub points at /tools only when a call is missing an argument ([51113aa](https://github.com/elelem-sh/elelem/commit/51113aab12a2820a8cbb35d22adbc6a869059f56))
+
 ## [0.12.0] - 2026-09-12
 
 ### Changed
