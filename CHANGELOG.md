@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.13.1](https://github.com/elelem-sh/elelem/compare/v0.13.0...v0.13.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* /provider NAME [MODEL] passes a model only when you type one ([69130c9](https://github.com/elelem-sh/elelem/commit/69130c90d0f69d9c3eacd0edfa74f88aed0bff2d))
+* a failed turn leaves the conversation as it was, and five smaller review fixes ([21a9dae](https://github.com/elelem-sh/elelem/commit/21a9dae4d2f17525d56aac8c42ae34d2490142f6))
+* ctrl-c stops a running command under the cli's int trap ([c068920](https://github.com/elelem-sh/elelem/commit/c0689209b503cbfde42b2a56e7fe5fadde7c186f))
+* execute has no timeout unless ELELEM_CMD_TIMEOUT is set, so commands can prompt on the terminal ([f34ac93](https://github.com/elelem-sh/elelem/commit/f34ac9386419aa940963a53475933df27b6df297))
+* plugin load failures reach the log, and ask at a terminal uses the configured output ([eaceeb4](https://github.com/elelem-sh/elelem/commit/eaceeb4f3020b75a2f0db15149ff18cf36ef8496))
+* the stub is now the demo provider, a shell plugin that shows how a provider works ([db833f5](https://github.com/elelem-sh/elelem/commit/db833f5ee81d75bde7a9deec7a8d2eb8f8c2ac13))
+* warnings go to a private log file, and a piped reply prints as plain text ([5a1cb06](https://github.com/elelem-sh/elelem/commit/5a1cb06337a88e4443958295c90fd164531b06ed))
+
 ## [0.13.0](https://github.com/elelem-sh/elelem/compare/v0.12.0...v0.13.0) (2026-11-15)
 
 
