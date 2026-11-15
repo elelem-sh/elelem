@@ -33,19 +33,6 @@ elelem
 
 elelem ships with `read`, `write` and `execute`. Use the plugin API to add more.
 
-## Models
-
-Without a model, elelem understands a few plain requests, like `show me README.md`
-or `run the tests`, and any tool name followed by its arguments.
-For a real model, install a provider:
-
-```bash
-gem install elelem-llama
-elelem -p llama
-```
-
-Read the docs at https://elelem.sh.
-
 ## Contributing
 
 ```bash
