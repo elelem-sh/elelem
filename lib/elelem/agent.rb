@@ -27,7 +27,11 @@ module Elelem
         content, tool_calls = fetch(ctx)
         return content if tool_calls.empty?
 
-        ctx.push({ role: "assistant", content: content, tool_calls: tool_calls }, *tool_calls.map { |c| process(c) })
+        ctx.push({
+          role: "assistant",
+          content: content,
+          tool_calls: tool_calls
+        }, *tool_calls.map { |c| process(c) })
       end
     end
 

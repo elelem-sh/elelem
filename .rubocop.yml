@@ -10,6 +10,9 @@ AllCops:
 Layout/LineLength:
   Max: 120
 
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
 Lint/EmptyBlock:
   Exclude:
     - "spec/**/*"
