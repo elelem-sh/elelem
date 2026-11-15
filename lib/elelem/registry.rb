@@ -39,7 +39,8 @@ module Elelem
       commands = Commands.new
       agent = Agent.new(build_provider(provider, **provider_options), toolbox: toolbox, output: output || build_output,
                                                                       template: template, system_prompt: system_prompt)
-      session = Session.new(agent, input: input || build_input(commands: commands), commands: commands)
+      session = Session.new(agent, input: input || build_input(commands: commands), commands: commands,
+                                   provider_name: provider, provider_options: provider_options)
       apply(session)
       session
     end
