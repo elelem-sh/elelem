@@ -7,7 +7,10 @@ Elelem.configure do |config|
                       params: { command: { type: "string" } },
                       required: ["command"],
                       aliases: ["bash", "sh", "exec", "execute<|channel|>"]) do |a|
-      Elelem::Builtins.sh("bash", args: ["-c", a["command"]], timeout: Elelem::Builtins.command_timeout) { |x| agent.output.print(x) }
+      result = Elelem::Builtins.sh("bash", args: ["-c", a["command"]], timeout: Elelem::Builtins.command_timeout) do |x|
+        agent.output.print(x)
+      end
+      result.merge(ok: result[:exit_status].zero?)
     end
 
     agent.toolbox.after("execute") do |args, result|

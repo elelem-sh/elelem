@@ -55,8 +55,10 @@ module Elelem
       Result.failure(error: errors.join(", ")) if errors.any?
     end
 
+    # A tool fails by returning error:, or ok: false (as execute does for a
+    # non-zero exit).
     def to_result(result)
-      result[:error] ? Result.failure(result) : Result.success(result)
+      result[:error] || result[:ok] == false ? Result.failure(result) : Result.success(result)
     end
 
     def failure(name, args, error)

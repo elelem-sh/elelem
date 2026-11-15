@@ -110,4 +110,11 @@ RSpec.describe Elelem::Toolbox do
 
     expect(tool.inspect).to eq("#<Elelem::Tool now>")
   end
+
+  it "treats ok: false from a tool as a failure" do
+    toolbox = described_class.new
+    toolbox.add("check", description: "Check", params: {}) { { ok: false, exit_status: 1 } }
+
+    expect(toolbox.run("check", {})).not_to be_ok
+  end
 end
