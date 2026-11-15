@@ -5,6 +5,7 @@ AllCops:
   Exclude:
     - "pkg/**/*"
     - "bin/**/*"
+    - "vendor/**/*"
 
 Metrics/ClassLength:
   Max: 100
