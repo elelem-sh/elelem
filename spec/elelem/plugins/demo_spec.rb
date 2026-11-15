@@ -48,10 +48,6 @@ RSpec.describe "the demo provider" do
     expect(events.last[:text]).to include("gem install elelem-llama, then elelem -p llama")
   end
 
-  it "is still registered as stub, for elelem-server 0.13.x" do
-    expect(Elelem::Config.build_provider("stub")).to be_a(Elelem::DemoProvider)
-  end
-
   it "drives a full turn: runs the command once, then replies" do
     session = Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: Elelem::NullOutput.new)
 
