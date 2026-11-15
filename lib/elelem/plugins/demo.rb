@@ -3,7 +3,7 @@
 module Elelem
   class DemoProvider
     def fetch(messages, tools, &)
-      return yield(type: "saying", text: install_hint) unless can_execute?(tools)
+      return yield(type: "saying", text: install_hint) unless shell?(tools)
       return yield(type: "saying", text: report(messages.last)) if messages.last[:role] == "tool"
 
       run(first_line_of_last_prompt(messages), id: "demo-#{messages.length}", &)
@@ -12,7 +12,7 @@ module Elelem
     private
 
     def install_hint = "I have no model and no shell here. For a model: gem install elelem-llama, then elelem -p llama"
-    def can_execute?(tools) = tools.any? { |tool| tool.dig(:function, :name) == "execute" }
+    def shell?(tools) = tools.any? { |tool| tool.dig(:function, :name) == "execute" }
 
     def first_line_of_last_prompt(messages)
       prompt = messages.rfind { |message| message[:role] == "user" }

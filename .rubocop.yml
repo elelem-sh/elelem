@@ -62,6 +62,20 @@ Naming/PredicateMethod:
     - call
     - run
 
+Naming/PredicatePrefix:
+  NamePrefix:
+    - is_
+    - has_
+    - have_
+    - does_
+    - can_
+  ForbiddenPrefixes:
+    - is_
+    - has_
+    - have_
+    - does_
+    - can_
+
 Style/Documentation:
   Enabled: false
 
