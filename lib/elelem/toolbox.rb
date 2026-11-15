@@ -2,7 +2,7 @@
 
 module Elelem
   class Toolbox
-    attr_reader :tools, :hooks, :aliases
+    attr_reader :tools
 
     def initialize
       @tools = {}
@@ -11,18 +11,12 @@ module Elelem
     end
 
     def clear!
-      @tools.clear
-      @aliases.clear
-      @hooks[:before].clear
-      @hooks[:after].clear
+      [@tools, @aliases, @hooks[:before], @hooks[:after]].each(&:clear)
     end
 
     def add(name, description:, params: {}, required: [], aliases: [], &handler)
-      schema = Schema.new(params: params, required: required)
-      tool = Tool.new(name, description: description, schema: schema, aliases: aliases, &handler)
-      @tools[name] = tool
-      tool.aliases.each { |a| @aliases[a] = name }
-      tool
+      aliases.each { |a| @aliases[a] = name }
+      @tools[name] = Tool.new(name, description:, params:, required:, aliases:, &handler)
     end
 
     def before(tool_name = :*, &block)
@@ -33,15 +27,17 @@ module Elelem
       @hooks[:after][tool_name] << block
     end
 
+    # The tool by name, else by alias, so a real tool named like an alias wins.
     def tool_for(name)
-      tools.fetch(@aliases.fetch(name, name)) { NullTool.new(name, available: tools.keys) }
+      tools[name] || tools[@aliases[name]]
     end
 
     def run(name, args)
       tool = tool_for(name)
-      invalid(tool, args) || to_result(dispatch(tool, args))
+      invalid(name, tool, args) || to_result(dispatch(tool, args))
     rescue StandardError, ScriptError => e
-      failure(name, args, e)
+      Elelem.logger.debug("toolbox: #{e.message}\n#{e.backtrace.join("\n")}")
+      Result.failure(error: e.message, name: name, args: args)
     end
 
     def to_a
@@ -50,8 +46,8 @@ module Elelem
 
     private
 
-    def invalid(tool, args)
-      errors = tool.validate(args)
+    def invalid(name, tool, args)
+      errors = tool ? tool.validate(args) : ["unknown tool: #{name.inspect}. Available: #{tools.keys.join(", ")}."]
       Result.failure(error: errors.join(", ")) if errors.any?
     end
 
@@ -61,26 +57,14 @@ module Elelem
       result[:error] || result[:ok] == false ? Result.failure(result) : Result.success(result)
     end
 
-    def failure(name, args, error)
-      Elelem.logger.debug("toolbox: #{error.message}\n#{error.backtrace.join("\n")}")
-      Result.failure(error: error.message, name: name, args: args)
-    end
-
     def dispatch(tool, args)
-      run_before_hooks(tool, args)
-      result = tool.call(args)
-      run_after_hooks(tool, args, result)
-      result
+      run_hooks(:before, tool, args)
+      tool.call(args).tap { |result| run_hooks(:after, tool, args, result) }
     end
 
-    def run_before_hooks(tool, args)
-      @hooks[:before][:*].each { |h| h.call(args, tool_name: tool.name) }
-      @hooks[:before][tool.name].each { |h| h.call(args) }
-    end
-
-    def run_after_hooks(tool, args, result)
-      @hooks[:after][:*].each { |h| h.call(args, result, tool_name: tool.name) }
-      @hooks[:after][tool.name].each { |h| h.call(args, result) }
+    def run_hooks(type, tool, *)
+      @hooks[type][:*].each { |h| h.call(*, tool_name: tool.name) }
+      @hooks[type][tool.name].each { |h| h.call(*) }
     end
   end
 end

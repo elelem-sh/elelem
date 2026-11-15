@@ -44,5 +44,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "shellwords", "~> 0.2"
   spec.add_dependency "stringio", "~> 3.1"
   spec.add_dependency "tempfile", "~> 0.3"
-  spec.add_dependency "uri", "~> 1.0"
 end

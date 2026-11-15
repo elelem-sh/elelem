@@ -2,6 +2,8 @@
 
 module Elelem
   class NullOutput < Output
-    def say(*, **) = nil
+    private
+
+    def write(_text) = nil
   end
 end

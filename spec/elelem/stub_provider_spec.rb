@@ -69,8 +69,8 @@ RSpec.describe Elelem::StubProvider do
 
     {
       "show me README.md" => ["read", { "path" => "README.md" }],
-      "what's in Gemfile?" => ["read", { "path" => "Gemfile" }],
       "create notes.txt with hello world" => ["write", { "path" => "notes.txt", "content" => "hello world" }],
+      "execute ls" => ["execute", { "command" => "ls" }],
       "what files are here?" => ["execute", { "command" => "ls" }],
       "run `git status`" => ["execute", { "command" => "git status" }],
       "write notes.txt hi" => ["write", { "path" => "notes.txt", "content" => "hi" }]
@@ -97,7 +97,7 @@ RSpec.describe Elelem::StubProvider do
 
     it "never writes to a word that is not a file name" do
       expect(events_for(user("write a commit message")).last[:text]).to eq(described_class::HELP)
-      expect(events_for(user("make docs with hugo")).last[:text]).to eq(described_class::HELP)
+      expect(events_for(user("create docs with hugo")).last[:text]).to eq(described_class::HELP)
     end
 
     it "runs tests without 'the' and reads a path followed by a period" do
@@ -105,7 +105,6 @@ RSpec.describe Elelem::StubProvider do
         Dir.chdir(dir) { expect(events_for(user("run tests")).last[:arguments]).to eq("command" => "rake") }
       end
       expect(events_for(user("show me README.md.")).last[:arguments]).to eq("path" => "README.md")
-      expect(events_for(user("what\u2019s in Gemfile?")).last[:arguments]).to eq("path" => "Gemfile")
     end
 
     it "never puts piped text into a command" do
@@ -122,8 +121,7 @@ RSpec.describe Elelem::StubProvider do
   it "says honestly what it can do when it does not understand" do
     events = events_for(user("make the tests pass"))
 
-    expect(events.map { |e| e[:type] }).to eq(%w[thinking saying])
-    expect(events.last[:text]).to eq(described_class::HELP)
+    expect(events).to eq([{ type: "saying", text: described_class::HELP }])
   end
 
   it "says what it can do when nothing was typed" do
@@ -135,24 +133,16 @@ RSpec.describe Elelem::StubProvider do
                  { role: "tool", tool_call_id: "1", content: result.to_json }]
   end
 
-  it "summarises each tool result like a model would" do
-    read = after("read", { "path" => "a.txt" }, { content: "1\n2\n" })
-    expect(events_for(read).last[:text]).to eq("a.txt has 2 lines.")
-    expect(events_for(after("write", { "path" => "a.txt" }, { bytes: 5 })).last[:text]).to eq("Wrote 5 bytes to a.txt.")
-    expect(events_for(after("execute", { "command" => "ls" }, { exit_status: 0 })).last[:text]).to eq("`ls` exited 0.")
-    expect(events_for(after("now", {}, { time: "noon", ok: true })).last[:text]).to eq("time: noon")
+  it "summarises a tool result as its fields" do
+    expect(events_for(after("write", { "path" => "a.txt" }, { bytes: 5, ok: true })).last[:text]).to eq("bytes: 5")
+    expect(events_for(after("now", {}, { time: "noon", zone: "UTC" })).last[:text]).to eq("time: noon\nzone: UTC")
+    expect(events_for(after("noop", {}, { ok: true })).last[:text]).to eq("noop is done.")
   end
 
-  it "reports a tool error without advice that does not apply" do
+  it "reports a tool error" do
     text = events_for(after("read", { "path" => "nope" }, { error: "not found" })).last[:text]
 
     expect(text).to eq("read failed: not found.")
-  end
-
-  it "points at /tools when the call was missing an argument" do
-    text = events_for(after("read", {}, { error: "missing path" })).last[:text]
-
-    expect(text).to eq("read failed: missing path. /tools shows what read takes.")
   end
 
   it "drives a full Agent#turn: calls the tool once, then stops" do
@@ -166,6 +156,6 @@ RSpec.describe Elelem::StubProvider do
     reply = Elelem::Agent.new(provider, toolbox: toolbox).turn("read README.md")
 
     expect(calls).to eq([{ "path" => "README.md" }])
-    expect(reply).to eq("README.md has 1 line.")
+    expect(reply).to eq("content: hi")
   end
 end

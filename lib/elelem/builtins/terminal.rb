@@ -2,37 +2,29 @@
 
 module Elelem
   module Builtins
-    class Terminal
+    # Output for a person at a terminal: dots while the model thinks, markdown
+    # through glow, files through bat, and a copy of everything in a private
+    # transcript under $XDG_STATE_HOME/elelem/sessions.
+    class Terminal < Output
       def initialize(stream: $stdout, **)
-        @stream = stream
+        super
         @dots_thread = nil
         @at_line_start = true
       end
 
       def say(text, as: nil)
         stop_dots
-        return if blank?(text)
-
-        text = render(text, as) if as
-        write "#{text}\n"
-        @at_line_start = true
+        super
       end
 
       def print(text)
         stop_dots
-        return if blank?(text)
-
-        write text
-        @at_line_start = false
-      end
-
-      def thinking(text)
-        print("\e[2;3m#{text}\e[0m") unless blank?(text)
+        super
       end
 
       def doing(name, args, state: "+")
         gap
-        say "#{state} \e[36m#{name}\e[0m(#{args})"
+        super
       end
 
       def waiting
@@ -47,15 +39,20 @@ module Elelem
       end
 
       def display_file(path, fallback: nil)
-        system("bat", "--paging=never", path) || say(fallback || path)
+        system("bat", "--paging=never", "--", path) || super
       end
 
       private
 
       def render(text, as)
-        return "\n  ✗ #{text}" if as == :error
-        return text unless as == :markdown
+        case as
+        when :error then "\n  x #{text}"
+        when :markdown then markdown(text)
+        else text
+        end
+      end
 
+      def markdown(text)
         gap
         width = begin
           @stream.winsize[1]
@@ -74,7 +71,6 @@ module Elelem
       def gap
         stop_dots
         write("\n") unless @at_line_start
-        @at_line_start = true
       end
 
       def stop_dots
@@ -84,23 +80,21 @@ module Elelem
         @dots_thread.join
         @dots_thread = nil
         write("\n")
-        @at_line_start = true
       end
 
       def write(text)
         @stream.print text
+        @at_line_start = text.end_with?("\n")
         (@transcript ||= open_transcript).print text
       end
 
       def open_transcript
         state_dir = File.join(ENV.fetch("XDG_STATE_HOME", File.expand_path("~/.local/state")), "elelem", "sessions")
-        FileUtils.mkdir_p(state_dir)
+        FileUtils.mkdir_p(state_dir, mode: 0o700)
+        File.chmod(0o700, state_dir)
         session_id = "#{Time.now.utc.strftime("%Y%m%dT%H%M%SZ")}-#{Process.pid}"
-        File.open(File.join(state_dir, "#{session_id}.transcript"), "a").tap { |f| f.sync = true } # rubocop:disable Style/FileOpen
-      end
-
-      def blank?(text)
-        text.nil? || text.to_s.strip.empty?
+        path = File.join(state_dir, "#{session_id}.transcript")
+        File.open(path, "a", 0o600).tap { |f| f.sync = true } # rubocop:disable Style/FileOpen
       end
     end
   end

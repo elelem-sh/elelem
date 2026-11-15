@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require "fileutils"
-require "json"
-require "open3"
-require "pathname"
-require "stringio"
-require "tempfile"
-
 module Elelem
   module Builtins
     def self.sh(cmd, args: [], cwd: Dir.pwd, env: {}, timeout: nil)
@@ -24,6 +17,7 @@ module Elelem
         end
 
         out.each_line do |line|
+          line = line.force_encoding(Encoding::UTF_8).scrub
           yield line if block_given?
           output.write(line)
         end
@@ -32,6 +26,10 @@ module Elelem
         status = wait_thr.value
         note = timed_out ? "\n[command timed out after #{timeout}s]" : ""
         { exit_status: status.exitstatus || (timed_out ? 124 : 1), content: truncate(output.string) + note }
+      rescue Interrupt
+        # In its own process group the command never sees Ctrl-C, so stop it here.
+        terminate(wait_thr.pid) if timeout
+        raise
       end
     end
 
@@ -50,13 +48,5 @@ module Elelem
     rescue Errno::ESRCH
       nil
     end
-
-    def self.command_timeout
-      value = ENV.fetch("ELELEM_CMD_TIMEOUT", nil)
-      value && !value.empty? ? Integer(value) : nil
-    end
   end
 end
-
-require_relative "builtins/terminal"
-require_relative "builtins/tool_markdown"

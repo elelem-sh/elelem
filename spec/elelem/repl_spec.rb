@@ -72,13 +72,27 @@ RSpec.describe Elelem::Repl do
     expect(ran).to eq("world")
   end
 
-  it "shows available commands when the slash command is unknown" do
-    output, said = capturing_output
-    session = session_with(input: input_returning("/bogus", nil), output: output, commands: Elelem::Commands.new)
+  it "sends a line starting with a path to the model, not to the commands" do
+    session = session_with(input: input_returning("/etc/hosts has a bad entry", nil))
+    turned = nil
+    session.define_singleton_method(:turn) { |prompt| turned = prompt }
 
     described_class.new(session).run
 
-    expect(said.last).to eq("")
+    expect(turned).to eq("/etc/hosts has a bad entry")
+  end
+
+  it "says a failed turn once as an error and keeps reading" do
+    output, said = capturing_output
+    errors = []
+    output.define_singleton_method(:say) { |text, as: nil| (as == :error ? errors : said) << text }
+    session = session_with(input: input_returning("first", "second", nil), output: output)
+    turned = []
+    session.define_singleton_method(:turn) { |prompt| turned << prompt and raise "provider down" }
+
+    described_class.new(session).run
+
+    expect([errors, turned]).to eq([["provider down", "provider down"], %w[first second]])
   end
 
   it "logs and reports the error when a command raises" do

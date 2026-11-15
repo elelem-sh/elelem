@@ -14,24 +14,23 @@ Elelem.configure do |config|
 
     agent.toolbox.before("write") do |args|
       path = Pathname.new(args["path"]).expand_path
-      next unless path.exist? && $stdin.tty?
+      next unless path.exist? && agent.input.interactive?
 
       Tempfile.create(["elelem", File.extname(path)]) do |t|
         t.write(args["content"])
         t.flush
-        system("diff", "--color=always", "-u", path.to_s, t.path)
+        diff, = Open3.capture2("diff", "--color=always", "-u", path.to_s, t.path)
+        agent.output.print(diff)
       end
+    rescue Errno::ENOENT
+      nil # no diff installed
     end
 
     agent.toolbox.after("write") do |_, result|
-      if result[:error]
-        agent.output.say "  ! #{result[:error]}"
-      else
-        agent.output.display_file(result[:path], fallback: "  -> #{result[:path]}")
-        # The model sees the checks in the write's own result.
-        if agent.toolbox.tools.key?("verify")
-          result[:verify] = agent.toolbox.run("verify", { "path" => result[:path] }).to_h
-        end
+      agent.output.display_file(result[:path], fallback: "  -> #{result[:path]}")
+      # The model sees the checks in the write's own result.
+      if agent.toolbox.tools.key?("verify")
+        result[:verify] = agent.toolbox.run("verify", { "path" => result[:path] }).to_h
       end
     end
   end

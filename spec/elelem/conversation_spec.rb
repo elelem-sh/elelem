@@ -7,7 +7,7 @@ RSpec.describe Elelem::Conversation do
     it "appends messages" do
       subject.add(role: "user", content: "hello")
       subject.add(role: "assistant", content: "hi")
-      expect(subject.length).to eq(2)
+      expect(subject.to_a.drop(1).map { |m| m[:content] }).to eq(%w[hello hi])
     end
 
     it "validates role" do
@@ -39,21 +39,38 @@ RSpec.describe Elelem::Conversation do
     it "removes all messages" do
       subject.add(role: "user", content: "hello")
       subject.clear!
-      expect(subject.length).to eq(0)
+      expect(subject.to_a.map { |m| m[:role] }).to eq(["system"])
     end
   end
 
   describe "#to_a" do
-    it "returns messages without system prompt by default" do
+    it "puts the system prompt first, then the messages, then any extra" do
       subject.add(role: "user", content: "hello")
-      expect(subject.to_a).to eq([{ role: "user", content: "hello" }])
+      extra = { role: "tool", content: "{}" }
+
+      expect(subject.to_a([extra]).map { |m| m[:role] }).to eq(%w[system user tool])
     end
 
-    it "includes system prompt when provided" do
-      subject.add(role: "user", content: "hello")
-      result = subject.to_a(system_prompt: "You are helpful.")
-      expect(result.first).to eq({ role: "system", content: "You are helpful." })
-      expect(result.last).to eq({ role: "user", content: "hello" })
+    it "renders the default template as the system prompt when none is given" do
+      expect(subject.to_a.first[:content]).to include("terminal coding agent")
+    end
+
+    it "uses template: as the full ERB template, replacing the default" do
+      conversation = described_class.new(template: "Custom template")
+
+      expect(conversation.to_a.first).to eq(role: "system", content: "Custom template")
+    end
+
+    it "prepends system_prompt: role text to the rendered template" do
+      conversation = described_class.new(template: "Custom template", system_prompt: "Research agent.")
+
+      expect(conversation.to_a.first[:content]).to eq("Research agent.\n\nCustom template")
+    end
+
+    it "renders a model-authored system_prompt literally, never as ERB" do
+      conversation = described_class.new(template: "Custom template", system_prompt: "<%= 1 + 1 %>")
+
+      expect(conversation.to_a.first[:content]).to eq("<%= 1 + 1 %>\n\nCustom template")
     end
   end
 end

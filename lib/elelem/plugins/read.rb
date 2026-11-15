@@ -8,7 +8,14 @@ Elelem.configure do |config|
                       required: ["path"],
                       aliases: ["open"]) do |a|
       path = Pathname.new(a["path"]).expand_path
-      path.exist? ? { content: path.read, path: a["path"] } : { error: "not found" }
+      next { error: "not found" } unless path.exist?
+
+      content = path.binread
+      next { error: "binary file (#{content.bytesize} bytes)" } if content.include?("\0")
+
+      content = content.force_encoding(Encoding::UTF_8).scrub
+
+      { content: Elelem::Builtins.truncate(content), path: a["path"] }
     end
 
     agent.toolbox.after("read") do |_, result|

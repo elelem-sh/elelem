@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "forwardable"
-
 module Elelem
   class Result
     extend Forwardable
@@ -21,7 +19,5 @@ module Elelem
     end
 
     def ok? = !!@payload[:ok]
-    def error? = !!@payload[:error]
-    def error = @payload[:error]
   end
 end

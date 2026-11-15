@@ -7,12 +7,12 @@ require "reline"
 
 module Elelem
   class CLI
-    COMMANDS = %w[chat ask files help].freeze
-    USAGE = <<~TEXT
+    COMMANDS = %w[chat ask help].freeze
+    USAGE = <<~TEXT.freeze
+      Usage: #{File.basename($PROGRAM_NAME)} [command] [options] [args]
       \nCommands:
         chat              Interactive REPL (default)
         ask <prompt>      One-shot query (reads stdin if piped)
-        files             Output files as XML (no options)
         help              Show this help
       \nOptions:
     TEXT
@@ -21,100 +21,51 @@ module Elelem
     def initialize(args, provider: "stub")
       @provider = provider
       @provider_options = {}
-      @args = parse(args)
+      @parser = OptionParser.new(USAGE) { |o| describe_options(o) }
+      @args = @parser.parse!(args)
     end
 
     def run
       command = @args.shift || "chat"
-      abort "Unknown command: #{command}" unless COMMANDS.include?(command)
-      send(command)
+      COMMANDS.include?(command) ? send(command) : abort("Unknown command: #{command}")
+    rescue StandardError, ScriptError => e
+      Elelem.logger.debug("cli: #{e.message}\n#{e.backtrace.join("\n")}")
+      abort "elelem: #{e.message}"
     end
 
     private
 
-    def parse(args)
-      @parser = OptionParser.new { |o| describe_options(o) }
-      @parser.parse!(args)
-    end
-
     def describe_options(parser)
-      describe_usage(parser)
       parser.on("-p", "--provider NAME", "Provider to use (default: #{@provider})") { |p| @provider = p }
       parser.on("--model NAME", "Model to use, passed to the provider") { |m| @provider_options[:model] = m }
       parser.on("--system-prompt TEXT", "Role text prepended to the system prompt") { |s| @system_prompt = s }
-      parser.on("-h", "--help", "Show this help") { print_help_and_exit(parser) }
+      parser.on("-h", "--help", "Show this help") { puts(parser) || exit }
     end
 
-    def print_help_and_exit(parser)
-      puts parser
-      exit
-    end
-
-    def describe_usage(parser)
-      parser.banner = "Usage: #{File.basename($PROGRAM_NAME)} [command] [options] [args]"
-      parser.separator USAGE
-    end
-
-    def help
-      puts @parser
-    end
+    def help = puts(@parser)
 
     def chat
       Elelem.start(provider: @provider, provider_options: @provider_options, system_prompt: @system_prompt)
-    rescue StandardError, ScriptError => e
-      warn_and_abort(e)
     end
 
+    # When stdout is piped, progress goes to stderr and only the reply to stdout.
     def ask
-      abort "Usage: elelem-chat ask <prompt>" if @args.empty?
+      abort "Usage: elelem ask <prompt>" if @args.empty?
 
-      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: output_for_ask,
+      piped = !$stdout.tty?
+      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: Output.new(stream: piped ? $stderr : $stdout),
                                          provider_options: @provider_options, system_prompt: @system_prompt)
-      print_reply(reply, piped: piped?)
-    rescue StandardError, ScriptError => e
-      warn_and_abort(e)
-    end
-
-    def piped?
-      !$stdout.tty?
-    end
-
-    def output_for_ask
-      Elelem::Output.new(stream: piped? ? $stderr : $stdout)
+      print_reply(reply, piped: piped)
     end
 
     def prompt_for_ask
       prompt = @args.join(" ")
-      $stdin.stat.pipe? ? "#{prompt}\n\n```\n#{$stdin.read}\n```" : prompt
+      $stdin.stat.then { |s| s.pipe? || s.file? } ? "#{prompt}\n\n```\n#{$stdin.read}\n```" : prompt
     end
 
     def print_reply(reply, piped:)
       abort "elelem: no reply" if reply.to_s.strip.empty?
       $stdout.puts(reply) if piped
-    end
-
-    def warn_and_abort(error)
-      Elelem.logger.debug("cli: #{error.message}\n#{error.backtrace.join("\n")}")
-      abort "elelem: #{error.message}"
-    end
-
-    def files
-      puts "<documents>"
-      candidate_files.each_with_index { |line, i| print_document(line, i) }
-      puts "</documents>"
-    end
-
-    def candidate_files
-      $stdin.stat.pipe? ? $stdin.readlines : `git ls-files`.lines
-    end
-
-    def print_document(line, index)
-      path = line.strip
-      return if path.empty? || !File.file?(path)
-
-      content = File.read(path)
-      puts %(<document index="#{index + 1}"><source>#{path}</source>) +
-           %(<document_content><![CDATA[#{content}]]></document_content></document>)
     end
   end
 end

@@ -34,6 +34,12 @@ RSpec.describe Elelem::Toolbox do
       expect(result[:content]).to include("RSpec.describe")
     end
 
+    it "runs a real tool named like another tool's alias" do
+      subject.add("open", description: "Open a URL") { |_a| { opened: true } }
+
+      expect(subject.run("open", { "path" => __FILE__ })[:opened]).to be(true)
+    end
+
     it "returns error for unknown tools" do
       result = subject.run("nonexistent", {})
       expect(result[:error]).to include("unknown tool")
@@ -49,9 +55,8 @@ RSpec.describe Elelem::Toolbox do
   end
 
   describe "#tool_for" do
-    it "returns a NullTool for an unknown name" do
-      tool = subject.tool_for("nonexistent")
-      expect(tool.name).to eq("nonexistent?")
+    it "returns nil for an unknown name" do
+      expect(subject.tool_for("nonexistent")).to be_nil
     end
   end
 

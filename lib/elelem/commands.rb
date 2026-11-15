@@ -4,6 +4,8 @@ module Elelem
   class Commands
     include Enumerable
 
+    Command = Struct.new(:description, :completions, :handler)
+
     def initialize(registry = {})
       @registry = registry
     end
@@ -13,22 +15,21 @@ module Elelem
     end
 
     def register(name, description: "", completions: nil, &handler)
-      @registry[name] = SlashCommand.new(name, description, completions, &handler)
+      @registry[name] = Command.new(description, completions, handler)
     end
 
+    # completions is a list, or a lambda that returns one.
     def completions_for(name, partial = "")
-      cmd = command_for(name)
-      return [] unless cmd&.completions
-
-      options = cmd.completions.respond_to?(:call) ? cmd.completions.call : cmd.completions
+      options = @registry[name]&.completions || []
+      options = options.call if options.respond_to?(:call)
       options.select { |o| o.start_with?(partial) }
     end
 
     def run(name, args = nil)
-      command = command_for(name)
+      command = @registry[name]
       return false unless command
 
-      command.call(args)
+      command.handler.call(args)
       true
     end
 
@@ -38,12 +39,6 @@ module Elelem
 
     def each
       @registry.each { |name, command| yield "/#{name}", command.description }
-    end
-
-    private
-
-    def command_for(name)
-      @registry[name]
     end
   end
 end

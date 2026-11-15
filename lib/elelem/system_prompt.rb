@@ -5,7 +5,7 @@ module Elelem
     DEFAULT = File.read(File.expand_path("prompts/default.erb", __dir__)).freeze
     USER_AGENTS_MD = Pathname.new(Dir.home).join(".agents/AGENTS.md").freeze
 
-    attr_accessor :template
+    attr_reader :template
 
     def initialize(template = nil)
       @template = template || DEFAULT

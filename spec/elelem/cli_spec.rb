@@ -25,6 +25,42 @@ RSpec.describe Elelem::CLI do
     end
   end
 
+  describe "ask" do
+    before do
+      Elelem.configure do |config|
+        config.provider(:raising) { Class.new { def fetch(*) = raise("provider down") }.new }
+      end
+    end
+
+    it "exits non-zero, with nothing on stdout, when the provider fails" do
+      status = nil
+      expect do
+        described_class.new(%w[ask -p raising hello]).run
+      rescue SystemExit => e
+        status = e.status
+      end.to output("").to_stdout.and output(/provider down/).to_stderr
+
+      expect(status).to eq(1)
+    end
+
+    it "appends stdin redirected from a file to the prompt" do
+      Tempfile.create("stdin") do |file|
+        file.write("from a file")
+        file.rewind
+        stdin = $stdin
+        $stdin = file
+        expect(described_class.new(%w[summarize]).send(:prompt_for_ask)).to include("from a file")
+      ensure
+        $stdin = stdin
+      end
+    end
+
+    it "names the elelem command in its usage error" do
+      expect { described_class.new(%w[ask]).run }.to raise_error(SystemExit)
+        .and output(/Usage: elelem ask <prompt>/).to_stderr
+    end
+  end
+
   it "prints a piped reply as plain text, not a code fence" do
     expect { described_class.new([]).send(:print_reply, "hello", piped: true) }.to output("hello\n").to_stdout
   end
