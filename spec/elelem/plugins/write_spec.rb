@@ -5,14 +5,14 @@ RSpec.describe "the write tool" do
 
   it "returns the verify result to the model" do
     session.toolbox.add("verify", description: "Verify", params: { path: { type: "string" } }) do |args|
-      { checked: args["path"], exit_status: 1 }
+      { checked: args["path"], error: "ruby -c exited 1" }
     end
 
     Dir.mktmpdir do |dir|
       path = File.join(dir, "a.rb")
       result = session.toolbox.run("write", { "path" => path, "content" => "x" })
 
-      expect(result[:verify]).to eq(checked: path, exit_status: 1, ok: true)
+      expect(result[:verify]).to eq(checked: path, error: "ruby -c exited 1", ok: false)
     end
   end
 
