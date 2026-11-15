@@ -7,7 +7,7 @@ module Elelem
     def initialize(template: nil, system_prompt: nil)
       @messages = []
       @template = SystemPrompt.new(template)
-      @role_text = system_prompt
+      @system_prompt = system_prompt
     end
 
     def add(role:, content:)
@@ -20,7 +20,7 @@ module Elelem
     def clear! = @messages.clear
 
     def to_a(extra = [])
-      system = [@role_text, @template.render].compact.join("\n\n")
+      system = [@system_prompt, @template.render].compact.join("\n\n")
       [{ role: "system", content: system }, *@messages, *extra]
     end
   end
