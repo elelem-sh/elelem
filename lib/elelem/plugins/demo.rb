@@ -35,5 +35,4 @@ end
 
 Elelem.configure do |config|
   config.provider(:demo) { Elelem::DemoProvider.new }
-  config.provider(:stub) { Elelem::DemoProvider.new }
 end
