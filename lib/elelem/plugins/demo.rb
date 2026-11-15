@@ -20,8 +20,12 @@ module Elelem
     end
 
     def tool_for(line)
-      line.start_with?("@") ? ["read", { "path" => line.delete_prefix("@") }] : ["execute", { "command" => line }]
+      return ["read", { "path" => line.delete_prefix("@") }] if line.start_with?("@") || file?(line)
+
+      ["execute", { "command" => line }]
     end
+
+    def file?(line) = File.file?(line) && !File.executable?(line)
 
     def use(name, arguments, id:)
       yield(type: "thinking", text: "I'll #{name} `#{arguments.values.first}`.")

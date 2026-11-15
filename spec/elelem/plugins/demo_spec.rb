@@ -30,6 +30,14 @@ RSpec.describe "the demo provider" do
     expect(events.last).to include(type: "doing", name: "read", arguments: { "path" => "README.md" })
   end
 
+  it "reads a file named without the @" do
+    expect(events_for(prompt("README.md")).last).to include(name: "read", arguments: { "path" => "README.md" })
+  end
+
+  it "runs a file that is executable" do
+    expect(events_for(prompt("bin/test")).last).to include(name: "execute", arguments: { "command" => "bin/test" })
+  end
+
   it "says which file it read" do
     session = Elelem::Config.build_session("demo", input: Elelem::NullInput.new, output: Elelem::NullOutput.new)
 
