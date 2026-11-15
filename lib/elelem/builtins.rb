@@ -26,7 +26,7 @@ module Elelem
         status = wait_thr.value
         note = timed_out ? "\n[command timed out after #{timeout}s]" : ""
         { exit_status: status.exitstatus || (timed_out ? 124 : 1), content: truncate(output.string) + note }
-      rescue Interrupt
+      rescue Interrupt, SystemExit
         # In its own process group the command never sees Ctrl-C, so stop it here.
         terminate(wait_thr.pid) if timeout
         raise
