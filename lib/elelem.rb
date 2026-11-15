@@ -32,6 +32,10 @@ require_relative "elelem/registry"
 require_relative "elelem/config"
 
 module Elelem
+  OLD_LOGS_KEPT = 3
+  LOG_SIZE_LIMIT = 1024 * 1024
+  private_constant :OLD_LOGS_KEPT, :LOG_SIZE_LIMIT
+
   def self.build(provider: "demo", **) = Config.build_session(provider, **)
   def self.start(**) = Repl.new(build(**)).run
   def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)
@@ -41,9 +45,7 @@ module Elelem
   end
 
   def self.logger
-    @logger ||= Logger.new(log_device, 3, 1_048_576).tap do |log|
-      log.level = Logger.const_get(ENV.fetch("ELELEM_LOG_LEVEL", "warn").upcase)
-    end
+    @logger ||= Logger.new(log_device, OLD_LOGS_KEPT, LOG_SIZE_LIMIT, level: ENV.fetch("ELELEM_LOG_LEVEL", "warn"))
   end
 
   def self.log_device
