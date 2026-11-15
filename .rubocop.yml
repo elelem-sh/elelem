@@ -37,6 +37,10 @@ Metrics/BlockLength:
     - "spec/**/*"
     - "*.gemspec"
 
+# exe/elelem runs with -W0, which silences Kernel#warn.
+Style/StderrPuts:
+  Enabled: false
+
 Style/GlobalVars:
   Exclude:
     - "spec/**/*"

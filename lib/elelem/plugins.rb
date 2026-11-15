@@ -31,7 +31,7 @@ module Elelem
     def load_plugin(file)
       load(file)
     rescue StandardError, ScriptError => e
-      warn "elelem: failed to load plugin #{file}: #{e.message}"
+      $stderr.puts "elelem: failed to load plugin #{file}: #{e.message}"
     end
   end
 end

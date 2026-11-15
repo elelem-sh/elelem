@@ -20,6 +20,19 @@ RSpec.describe Elelem::Repl do
     Elelem::Session.new(agent, input: input, commands: commands)
   end
 
+  it "remembers prompt lines, not empty ones" do
+    input = input_returning("hello", "", nil)
+    remembered = []
+    input.define_singleton_method(:remember) { |line| remembered << line }
+    described_class.new(session_with(input: input)).run
+
+    expect(remembered).to eq(["hello"])
+  end
+
+  it "runs with an input that cannot remember" do
+    expect { described_class.new(session_with(input: input_returning("hello", nil))).run }.not_to raise_error
+  end
+
   it "says the version banner and reads until input returns nil" do
     output, said = capturing_output
     session = session_with(input: input_returning(nil), output: output)

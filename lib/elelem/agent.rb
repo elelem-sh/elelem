@@ -94,7 +94,7 @@ module Elelem
     end
 
     def warn_and_say(error)
-      Elelem.logger.warn("agent: #{error.message}")
+      Elelem.logger.debug("agent: #{error.message}")
       output.say(error.message, as: :error)
     end
   end

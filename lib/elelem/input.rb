@@ -11,7 +11,11 @@ module Elelem
     end
 
     def ask(prompt)
-      Reline.readline(prompt, true)&.strip
+      Reline.readline(prompt, false)&.strip
+    end
+
+    def remember(line)
+      Reline::HISTORY << line
     end
 
     def interactive?

@@ -15,7 +15,14 @@ module Elelem
 
     private
 
+    # Only lines typed at the prompt go in history, not answers to a tool.
+    def remember(line)
+      input = @session.input
+      input.remember(line) if input.respond_to?(:remember)
+    end
+
     def dispatch_line(line)
+      remember(line)
       line.start_with?("/") ? command(line) : @session.turn(line)
     end
 
@@ -27,7 +34,7 @@ module Elelem
     end
 
     def warn_and_say(error)
-      Elelem.logger.warn("repl: #{error.message}")
+      Elelem.logger.debug("repl: #{error.message}")
       @session.output.say(error.message, as: :error)
     end
   end

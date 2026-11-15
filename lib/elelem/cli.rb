@@ -94,7 +94,7 @@ module Elelem
     end
 
     def warn_and_abort(error)
-      Elelem.logger.warn("cli: #{error.message}\n#{error.backtrace.join("\n")}")
+      Elelem.logger.debug("cli: #{error.message}\n#{error.backtrace.join("\n")}")
       abort "elelem: #{error.message}"
     end
 

@@ -60,7 +60,7 @@ module Elelem
     end
 
     def failure(name, args, error)
-      Elelem.logger.warn("toolbox: #{error.message}\n#{error.backtrace.join("\n")}")
+      Elelem.logger.debug("toolbox: #{error.message}\n#{error.backtrace.join("\n")}")
       Result.failure(error: error.message, name: name, args: args)
     end
 
