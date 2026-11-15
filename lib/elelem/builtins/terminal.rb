@@ -87,18 +87,22 @@ module Elelem
       def write(text)
         @stream.print text
         @at_line_start = text.end_with?("\n")
-        (@transcript ||= open_transcript).print text
-      end
-
-      def open_transcript
-        File.open(transcript_path, "a", 0o600).tap { |f| f.sync = true } # rubocop:disable Style/FileOpen
+        File.write(transcript_path, text, mode: "a", perm: 0o600)
       end
 
       def transcript_path
-        dir = File.join(Elelem.state_dir, "sessions")
-        FileUtils.mkdir_p(dir, mode: 0o700)
-        File.chmod(0o700, dir)
-        File.join(dir, "#{Time.now.utc.strftime("%Y%m%dT%H%M%SZ")}-#{Process.pid}.transcript")
+        @transcript_path ||= File.join(sessions_dir, "#{started_at}-#{Process.pid}.transcript")
+      end
+
+      def started_at
+        Time.now.utc.strftime("%Y%m%dT%H%M%SZ")
+      end
+
+      def sessions_dir
+        File.join(Elelem.state_dir, "sessions").tap do |dir|
+          FileUtils.mkdir_p(dir, mode: 0o700)
+          File.chmod(0o700, dir)
+        end
       end
     end
   end
