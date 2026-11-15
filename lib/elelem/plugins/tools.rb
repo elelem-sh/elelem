@@ -14,7 +14,8 @@ Elelem.configure do |config|
 
         agent.output.say Elelem::Builtins::ToolMarkdown.to_markdown(tool), as: :markdown
       else
-        rows = agent.toolbox.tools.each_value.map { |tool| Elelem::Builtins::ToolMarkdown.summary(tool) }
+        # values copies the list, so a plugin adding tools from a thread cannot break this loop.
+        rows = agent.toolbox.tools.values.map { |tool| Elelem::Builtins::ToolMarkdown.summary(tool) }
 
         md = String.new("| Tool | Description |\n")
         md << "|------|-------------|\n"
