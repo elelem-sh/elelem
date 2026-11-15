@@ -60,7 +60,9 @@ module Elelem
     def require_gem(name)
       require "elelem/#{name}"
       @registration.providers.fetch(name.to_s) { unregistered_provider(name) }
-    rescue LoadError
+    rescue LoadError => e
+      raise unless e.path == "elelem/#{name}"
+
       raise "unknown provider: #{name.inspect}. Available: #{names.join(", ")}. Run: gem install elelem-#{name}"
     end
 

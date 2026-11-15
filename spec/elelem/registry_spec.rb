@@ -32,6 +32,19 @@ RSpec.describe Elelem::Registry do
       expect { registry.build_provider("unknown") }.to raise_error(/unknown provider/)
     end
 
+    it "reports a load error inside an installed provider gem as itself" do
+      Dir.mktmpdir do |dir|
+        FileUtils.mkdir_p(File.join(dir, "elelem"))
+        File.write(File.join(dir, "elelem", "broken_dep.rb"), 'require "elelem/no_such_dependency"')
+        $LOAD_PATH.unshift(dir)
+
+        expect { registry.build_provider("broken_dep") }
+          .to raise_error(LoadError, %r{elelem/no_such_dependency})
+      ensure
+        $LOAD_PATH.delete(dir)
+      end
+    end
+
     it "passes options through to the factory" do
       seen = nil
       registry.configure { |c| c.provider(:model_aware) { |**options| seen = options } }
