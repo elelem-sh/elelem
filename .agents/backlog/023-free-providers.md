@@ -62,7 +62,7 @@ What the user does:
 
 * [ ] lib/elelem/registry.rb:15 - `build_provider`
 * [ ] lib/elelem/registry.rb:60 - `require_gem`, does `require "elelem/#{name}"`
-* [ ] lib/elelem/provider_switch.rb:13 - `/provider NAME` takes the same path
+* [ ] lib/elelem/plugins/provider.rb - `/provider NAME` takes the same path
 * [ ] openai/lib/elelem/openai.rb:14 - provider registration and `env` lambda
 * [ ] openai/lib/elelem/openai/provider.rb:6 - `Provider#initialize(model:, api_key:, base_url:)`
 * [ ] openai/lib/elelem/openai/provider.rb:29 - `build_request_body`
