@@ -36,19 +36,21 @@ module Elelem
     end
 
     def fetch(ctx)
+      events = stream(ctx)
+      content = events.filter_map { |e| e[:text] if e[:type] == "saying" }.join
+      output.say(content, as: :markdown)
+      [content, events.filter_map { |e| e.slice(:id, :name, :arguments) if e[:type] == "doing" }]
+    end
+
+    def stream(ctx)
       output.waiting
-      [String.new, []].tap do |content, tool_calls|
-        provider.fetch(@conversation.to_a(ctx), toolbox.to_a) { |event| handle_event(event, content, tool_calls) }
-        output.say(content, as: :markdown)
+      [].tap do |events|
+        provider.fetch(@conversation.to_a(ctx), toolbox.to_a) { |event| events << event.tap { show_thinking(it) } }
       end
     end
 
-    def handle_event(event, content, tool_calls)
-      case event[:type]
-      when "saying" then content << event[:text].to_s
-      when "thinking" then output.thinking(event[:text])
-      when "doing" then tool_calls << event.slice(:id, :name, :arguments)
-      end
+    def show_thinking(event)
+      output.thinking(event[:text]) if event[:type] == "thinking"
     end
 
     def process(call)
