@@ -18,8 +18,10 @@ Options to consider:
 
 # SEE ALSO
 
-* [ ] lib/elelem/toolbox.rb - `header` method
-* [ ] lib/elelem/terminal.rb - Output formatting
+* [ ] lib/elelem/output.rb:25 - `Output#doing`, prints `+ name(args)` with `args` as a Hash
+* [ ] lib/elelem/builtins/terminal.rb:22 - `Terminal#doing`, adds a gap first
+* [ ] lib/elelem/agent.rb:58 - `process` calls `output.doing` for each tool call
+* [ ] lib/elelem/plugins/execute.rb:16 - after hook prints `x execute(args)` on failure
 
 # Tasks
 

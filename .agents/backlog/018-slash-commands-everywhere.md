@@ -2,13 +2,15 @@ As a `user`, I `want slash commands available at any prompt`, so that `I can use
 
 # SYNOPSIS
 
-Enable slash command processing at every `Terminal#ask` call, not just the main REPL.
+Enable slash command processing at every `Input#ask` call, not just the main REPL.
 
 # DESCRIPTION
 
-Currently, slash commands like `/shell` only work at the main agent prompt.
-When the agent asks a question (e.g., via the interview tool), the user
-cannot access these commands.
+Currently, slash commands like `/shell` only run at the main agent
+prompt: `Repl#command` dispatches them, but `Input#ask` only completes
+them. When the agent asks a question (e.g., via the interview tool in
+`elelem-tools`), typing `/shell` returns the text `/shell` as the
+answer.
 
 Example scenario:
 1. Agent asks: "Should I commit this to git?"
@@ -18,16 +20,19 @@ Example scenario:
 5. Agent knows the user committed the changes
 
 Behavior:
-- All `Terminal#ask` calls should process slash commands
+- All `Input#ask` calls should process slash commands
 - `/shell` captures command history and output from the subshell
 - Result is returned as the "answer" to the prompt
 - Other commands (`/help`, `/context`, etc.) work contextually
 
 # SEE ALSO
 
-* [ ] lib/elelem/terminal.rb - `ask` method
+* [ ] lib/elelem/input.rb:12 - `Input#ask`
+* [ ] lib/elelem/input.rb:32 - `complete`, already completes slash commands at any prompt
 * [ ] lib/elelem/commands.rb - Slash command registry
-* [ ] lib/elelem/agent.rb - REPL command processing
+* [ ] lib/elelem/repl.rb:26 - `command`, REPL-only dispatch
+* [ ] tools/lib/elelem/tools/shell.rb - `/shell`, adds the transcript to the conversation
+* [ ] tools/lib/elelem/tools/interview.rb - asks with `agent.input.ask("> ")`
 
 # Tasks
 
@@ -35,10 +40,10 @@ Behavior:
 
 # Acceptance Criteria
 
-* [ ] Slash commands recognized at any `Terminal#ask` prompt
+* [ ] Slash commands recognized at any `Input#ask` prompt
 * [ ] `/shell` drops user into interactive shell
 * [ ] Shell session output/history captured on exit
 * [ ] Captured output returned as the prompt answer
 * [ ] `/help` shows available commands at any prompt
-* [ ] Tab completion works for slash commands at any prompt
+* [x] Tab completion works for slash commands at any prompt
 * [ ] Regular text input still works normally

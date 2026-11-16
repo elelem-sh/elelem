@@ -39,7 +39,10 @@ Pager activates when output exceeds terminal height.
 
 # SEE ALSO
 
-* [ ] lib/elelem/terminal.rb - Output methods
+* [ ] lib/elelem/builtins/terminal.rb:46 - `markdown`, already pipes replies through `glow -s dark -w WIDTH -`
+* [ ] lib/elelem/builtins/terminal.rb:93 - `write`, every byte also goes to the session transcript
+* [ ] lib/elelem/agent.rb:38 - `fetch` prints the whole reply at the end of the turn
+* [ ] .agents/backlog/024-stream-replies.md - streaming replies changes when paging can start
 * [ ] `$PAGER` environment variable
 * [ ] `IO.console.winsize` for terminal dimensions
 * [ ] `glow` - Markdown rendering CLI
@@ -54,6 +57,7 @@ Pager activates when output exceeds terminal height.
 * [ ] Long output pauses for reading (pager behavior)
 * [ ] After quitting pager, full output visible in terminal scrollback
 * [ ] tmux `capture-pane -p -S -` captures all previous output
+* [x] Markdown rendered via `glow` (without paging)
 * [ ] Markdown rendered via `glow` before paging
 * [ ] ANSI colors preserved
 * [ ] Short output prints directly (no pager overhead)

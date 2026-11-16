@@ -1,110 +1,58 @@
-# XDG Base Directory Support
+As a `Linux user`, I `want elelem to respect the XDG Base Directory variables`, so that `its files are kept where I expect them`.
 
-As a **Linux user**, I want elelem to respect XDG Base Directory conventions, so that my configuration, data, and cache files are organized in standard locations.
+# SYNOPSIS
 
-## SYNOPSIS
+Decide whether user config follows `XDG_CONFIG_HOME`; state already follows `XDG_STATE_HOME`.
 
-Support `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, and `XDG_CACHE_HOME` environment variables for file storage.
+# DESCRIPTION
 
-## DESCRIPTION
+Part of this has shipped. `Elelem.state_dir` is
+`$XDG_STATE_HOME/elelem`, or `~/.local/state/elelem` when the variable
+is unset. The log (`elelem.log`) and the session transcripts
+(`sessions/*.transcript`) are written there (5a1cb06, 8f81f14).
 
-Currently, elelem uses `~/.elelem/` for all user-level files (permissions, plugins, prompts, MCP config). This doesn't follow the XDG Base Directory specification used by most Linux applications.
+The rest of the old story no longer applies to core: `~/.elelem` is
+gone (renamed to `~/.agents` in 0.11.0), and permissions, MCP config,
+OAuth tokens and models moved out to plugin gems.
 
-### Current Behavior
+What remains is user config. Core reads it from fixed paths:
 
-```ruby
-# permissions.rb, plugins.rb, system_prompt.rb, mcp.rb
-LOAD_PATHS = [
-  "~/.elelem/...",
-  ".elelem/..."
-]
-```
+* `~/.agents/plugins/*.rb` and `.agents/plugins/*.rb` (plugins)
+* `~/.agents/AGENTS.md` and the nearest `AGENTS.md` up the tree
+  (system prompt)
 
-### Proposed Behavior
+`~/.agents` is shared with other agent tools, so moving it under
+`$XDG_CONFIG_HOME/elelem` would split it from them. Decide one of:
 
-**Config** (`XDG_CONFIG_HOME` or `~/.config`):
-- `permissions.json`
-- `plugins/`
-- `prompts/`
-- `mcp.json`
+1. Keep `~/.agents` and document why it does not follow XDG.
+2. Also look in `$XDG_CONFIG_HOME/agents` (default `~/.config/agents`),
+   with `~/.agents` still read, and a fixed order between them.
 
-**Data** (`XDG_DATA_HOME` or `~/.local/share`):
-- Conversation history (future)
-- MCP OAuth tokens
+Plugin gems that keep their own files (`elelem-llama` models in
+`~/.agents/models`, `elelem-mcp` logs and tokens) should follow the
+same decision; caches such as downloaded models belong under
+`XDG_CACHE_HOME` if option 2 is chosen.
 
-**Cache** (`XDG_CACHE_HOME` or `~/.cache`):
-- Downloaded models (for local inference)
-- MCP server logs
+# SEE ALSO
 
-### Search Order (Config)
+* [ ] lib/elelem.rb:43 - `state_dir`, uses `XDG_STATE_HOME`
+* [ ] lib/elelem/builtins/terminal.rb:107 - `sessions_dir` under `state_dir`
+* [ ] lib/elelem/plugins.rb:5 - `LOAD_PATHS`, `~/.agents/plugins` and `.agents/plugins`
+* [ ] lib/elelem/system_prompt.rb:6 - `USER_AGENTS_MD`, `~/.agents/AGENTS.md`
+* [ ] llama/lib/elelem/llama/model_resolver.rb - models in `~/.agents/models`
+* [ ] https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
-```ruby
-LOAD_PATHS = [
-  ".elelem",                                      # 1. Project-local (highest)
-  File.join(xdg_config_home, "elelem"),           # 2. XDG location
-  File.join(ENV["HOME"], ".elelem"),              # 3. Legacy (deprecated)
-]
-```
-
-### Migration Path
-
-1. **Phase 1**: Add XDG support, keep `~/.elelem` as fallback
-2. **Phase 2**: Log deprecation warning when `~/.elelem` is used
-3. **Phase 3**: Remove `~/.elelem` support in future major version
-
-## SEE ALSO
-
-* [ ] lib/elelem/permissions.rb - `LOAD_PATHS` constant
-* [ ] lib/elelem/plugins.rb - `LOAD_PATHS` constant
-* [ ] lib/elelem/system_prompt.rb - `LOAD_PATHS` constant
-* [ ] lib/elelem/mcp.rb - hardcoded paths for config and logs
-* [ ] lib/elelem/mcp/token_storage.rb - OAuth token paths
-* [ ] XDG Base Directory Spec: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-
-## Tasks
+# Tasks
 
 * [ ] TBD (filled in design mode)
 
-## Acceptance Criteria
+# Acceptance Criteria
 
-* [ ] When `XDG_CONFIG_HOME` is set, config files load from `$XDG_CONFIG_HOME/elelem/`
-* [ ] When `XDG_CONFIG_HOME` is unset, config files load from `~/.config/elelem/`
-* [ ] When `XDG_DATA_HOME` is set, data files store in `$XDG_DATA_HOME/elelem/`
-* [ ] When `XDG_DATA_HOME` is unset, data files store in `~/.local/share/elelem/`
-* [ ] When `XDG_CACHE_HOME` is set, cache files store in `$XDG_CACHE_HOME/elelem/`
-* [ ] When `XDG_CACHE_HOME` is unset, cache files store in `~/.cache/elelem/`
-* [ ] Project-local `.elelem/` takes precedence over XDG locations for config
-* [ ] Project-local `.elelem/` does NOT store data or cache (only config)
-* [ ] Legacy `~/.elelem/` still works as fallback
-* [ ] Deprecation warning logged when loading from `~/.elelem/`
-* [ ] All affected files updated: permissions.rb, plugins.rb, system_prompt.rb, mcp.rb, token_storage.rb
-
-## Implementation Notes
-
-Consider extracting a shared module:
-
-```ruby
-module Elelem
-  module Paths
-    def self.config_home
-      ENV["XDG_CONFIG_HOME"] || File.join(ENV["HOME"], ".config")
-    end
-
-    def self.data_home
-      ENV["XDG_DATA_HOME"] || File.join(ENV["HOME"], ".local", "share")
-    end
-
-    def self.cache_home
-      ENV["XDG_CACHE_HOME"] || File.join(ENV["HOME"], ".cache")
-    end
-
-    def self.config_paths
-      [
-        ".elelem",
-        File.join(config_home, "elelem"),
-        File.join(ENV["HOME"], ".elelem")  # deprecated
-      ]
-    end
-  end
-end
-```
+* [x] When `XDG_STATE_HOME` is set, the log and transcripts go to `$XDG_STATE_HOME/elelem/`
+* [x] When `XDG_STATE_HOME` is unset, they go to `~/.local/state/elelem/`
+* [ ] The choice between option 1 and option 2 is recorded in this story
+* [ ] The README and elelem.sh state where elelem reads config and writes state
+* [ ] If option 2: with `XDG_CONFIG_HOME` set, plugins and `AGENTS.md` load from `$XDG_CONFIG_HOME/agents/`
+* [ ] If option 2: with it unset, they load from `~/.config/agents/`
+* [ ] If option 2: `~/.agents` still loads, and the order between the two is documented and tested
+* [ ] Project-local `.agents/plugins` still loads after user plugins, so it can override them

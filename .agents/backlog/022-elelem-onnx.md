@@ -22,3 +22,17 @@ Measure speed and tool use before picking one.
 * [ ] https://rubygems.org/gems/onnxruntime
 * [ ] ggml/lib/elelem/ggml/tokenizer.rb - a Ruby BPE tokenizer
 * [ ] llama/lib/elelem/llama/model_resolver.rb - model lookup in ~/.agents/models
+* [ ] .agents/backlog/011-local-inference-implementation.md - llama.cpp provider
+
+# Tasks
+
+* [ ] TBD (filled in design mode)
+
+# Acceptance Criteria
+
+* [ ] `gem install elelem-onnx` compiles nothing on Linux, macOS and Windows
+* [ ] `elelem -p onnx` starts a session
+* [ ] The model downloads on first run and is checked against a pinned SHA-256
+* [ ] The tokenizer is pure Ruby and reads `tokenizer.json`
+* [ ] Tool calls from the model are parsed and run
+* [ ] The chosen model is picked from the candidates by measured speed and tool use

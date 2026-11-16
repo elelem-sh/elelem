@@ -6,7 +6,10 @@ Extend the interview tool to support text, single-select, and multi-select input
 
 # DESCRIPTION
 
-The interview tool currently only supports free-form text input. This story adds:
+The interview tool lives in `elelem-tools`, not in core. It only
+supports free-form text input: it renders the question with
+`agent.output.say(question, as: :markdown)` and returns
+`{ answer: agent.input.ask("> ") }`. This story adds:
 
 1. **Input modes**:
    - `text` - Free-form text input (current behavior, default)
@@ -29,8 +32,9 @@ The interview tool currently only supports free-form text input. This story adds
 
 # SEE ALSO
 
-* [ ] lib/elelem/terminal.rb - Add `select` and `multi_select` methods
-* [ ] lib/elelem/plugins/interview.rb - Add `options`, `multi`, and `questions` params
+* [ ] tools/lib/elelem/tools/interview.rb - the tool; add `options`, `multi`, and `questions` params
+* [ ] lib/elelem/input.rb:12 - `Input#ask`; add `select` and `multi_select` beside it
+* [ ] lib/elelem/null_input.rb - non-interactive input, needs the numbered fallback
 
 # Tasks
 
@@ -67,22 +71,22 @@ The following implementation plan is provided as guidance for the developer.
 
 ## Files to Modify
 
-- `lib/elelem/terminal.rb` - Add `select` and `multi_select` methods
-- `lib/elelem/plugins/interview.rb` - Add `options`, `multi`, and `questions` params
+- `lib/elelem/input.rb` (core) - Add `select` and `multi_select` methods
+- `tools/lib/elelem/tools/interview.rb` (elelem-tools) - Add `options`, `multi`, and `questions` params
 
-## Terminal API
+## Input API
 
 ```ruby
 # Single select - returns selected option string
-terminal.select(options) # => "option1"
+input.select(options) # => "option1"
 
 # Multi select - returns array of selected options
-terminal.multi_select(options) # => ["option1", "option3"]
+input.multi_select(options) # => ["option1", "option3"]
 ```
 
 ## Reference Implementation
 
-### Terminal#select (single choice)
+### Input#select (single choice)
 
 ```ruby
 def select(options)
@@ -131,7 +135,7 @@ def read_key
 end
 ```
 
-### Terminal#multi_select (multiple choice)
+### Input#multi_select (multiple choice)
 
 ```ruby
 def multi_select(options)
@@ -169,37 +173,35 @@ end
 ### Updated Interview Plugin
 
 ```ruby
-Elelem::Plugins.register(:interview) do |agent|
-  agent.toolbox.add("interview",
-    description: "Ask the user a question and wait for their response",
-    params: {
-      question: { type: "string", description: "The question to ask" },
-      options: { type: "array", description: "List of options for selector" },
-      multi: { type: "boolean", description: "Allow multiple selections" },
-      questions: { type: "array", description: "Batch of question objects" }
-    },
-    required: ["question"]
-  ) do |args|
-    if args["questions"]&.any?
-      # Batch mode
-      answers = args["questions"].map do |q|
-        agent.terminal.say(agent.terminal.markdown(q["question"]))
-        ask_one(agent.terminal, q["options"], q["multi"])
+Elelem.configure do |config|
+  config.setup(:interview) do |agent|
+    ask_one = lambda do |options, multi|
+      if options&.any?
+        multi ? agent.input.multi_select(options) : agent.input.select(options)
+      else
+        agent.input.ask("> ")
       end
-      { answers: answers }
-    else
-      # Single question mode
-      agent.terminal.say(agent.terminal.markdown(args["question"]))
-      answer = ask_one(agent.terminal, args["options"], args["multi"])
-      { answer: answer }
     end
-  end
 
-  def ask_one(terminal, options, multi)
-    if options&.any?
-      multi ? terminal.multi_select(options) : terminal.select(options)
-    else
-      terminal.ask("> ")
+    agent.toolbox.add("interview",
+                      description: "Ask the user a question and wait for their response",
+                      params: {
+                        question: { type: "string", description: "The question to ask" },
+                        options: { type: "array", description: "List of options for selector" },
+                        multi: { type: "boolean", description: "Allow multiple selections" },
+                        questions: { type: "array", description: "Batch of question objects" }
+                      },
+                      required: ["question"]) do |args|
+      if args["questions"]&.any?
+        answers = args["questions"].map do |q|
+          agent.output.say(q["question"], as: :markdown)
+          ask_one.call(q["options"], q["multi"])
+        end
+        { answers: answers }
+      else
+        agent.output.say(args["question"], as: :markdown)
+        { answer: ask_one.call(args["options"], args["multi"]) }
+      end
     end
   end
 end
@@ -207,7 +209,7 @@ end
 
 ## Verification
 
-1. Run `./bin/run -p vertex`
+1. Run `./bin/run -p NAME` with elelem-tools loaded
 2. Ask the LLM to use the interview tool with options
 3. Test arrow key navigation
 4. Test single select (Enter confirms)

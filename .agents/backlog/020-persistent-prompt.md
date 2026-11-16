@@ -16,15 +16,18 @@ Possible approaches:
 3. Spinner/indicator that transitions to prompt when ready
 
 Information to show:
-- Current mode (plan/design/build/review/verify)
+- Current provider and model (core no longer has modes)
 - Ready state (waiting for input vs. processing)
 - Token usage or cost (optional)
 - Current branch or project context (optional)
 
 # SEE ALSO
 
-* [ ] lib/elelem/terminal.rb - Prompt rendering
-* [ ] lib/elelem/agent.rb - State management
+* [ ] lib/elelem/repl.rb:10 - prompt is a plain `> ` passed to `Input#ask`
+* [ ] lib/elelem/input.rb:26 - `read_line`, Reline prompt
+* [ ] lib/elelem/builtins/terminal.rb:27 - `waiting`, the dots shown while processing
+* [ ] lib/elelem/plugins/provider.rb - `/provider NAME [MODEL]` changes the provider mid-session
+* [ ] .agents/backlog/031-terminal-styling.md - bold prompt, NO_COLOR
 * [ ] ANSI escape sequences for cursor positioning
 
 # Tasks
@@ -34,7 +37,7 @@ Information to show:
 # Acceptance Criteria
 
 * [ ] Prompt always visible or redrawn after output
-* [ ] Current mode displayed in prompt
+* [ ] Current provider (and model, if set) displayed in or near the prompt
 * [ ] Clear visual distinction between ready and processing states
 * [ ] Prompt survives terminal resize
 * [ ] Works correctly with pager integration (story 017)
