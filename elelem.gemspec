@@ -35,7 +35,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "forwardable", "~> 1.4"
   spec.add_dependency "io-console", "~> 0.9"
   spec.add_dependency "json", "~> 3.0"
-  spec.add_dependency "json_schemer", "~> 2.5"
   spec.add_dependency "logger", "~> 1.7"
   spec.add_dependency "open3", "~> 0.2"
   spec.add_dependency "optparse", "~> 0.8"

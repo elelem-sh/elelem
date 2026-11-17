@@ -54,6 +54,33 @@ RSpec.describe Elelem::Toolbox do
     end
   end
 
+  describe "#run with invalid arguments" do
+    before do
+      params = { path: { type: "string" }, limit: { type: "integer" }, mode: { type: "string", enum: %w[r w] } }
+      subject.add("peek", description: "Peek", params: params, required: ["path"]) { |a| { peeked: a["path"] } }
+    end
+
+    it "runs a tool whose arguments are valid" do
+      expect(subject.run("peek", { "path" => "a", "limit" => 2, "mode" => "r" })[:peeked]).to eq("a")
+    end
+
+    it "fails, without running the tool, with every error in one message" do
+      result = subject.run("peek", { "limit" => "2", "mode" => "x" })
+
+      expect([result.ok?, result.key?(:peeked), result[:error]]).to eq(
+        [false, false, 'missing required: path, limit: expected integer, got string, mode: expected one of "r", "w"']
+      )
+    end
+
+    it "fails when the arguments are missing altogether" do
+      expect(subject.run("peek", nil)[:error]).to eq("missing required: path")
+    end
+
+    it "fails when the arguments are not an object" do
+      expect(subject.run("peek", ["a"])[:error]).to eq("arguments: expected object, got array")
+    end
+  end
+
   describe "#tool_for" do
     it "returns nil for an unknown name" do
       expect(subject.tool_for("nonexistent")).to be_nil
