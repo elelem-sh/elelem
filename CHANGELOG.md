@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/elelem-sh/elelem/compare/v0.14.0...v0.14.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* validate tool arguments with a small built-in validator instead of json_schemer ([d4160e8](https://github.com/elelem-sh/elelem/commit/d4160e847c78ef927adf5156360e11a235eccc81))
+
 ## [0.14.0](https://github.com/elelem-sh/elelem/compare/v0.13.1...v0.14.0) (2026-11-15)
 
 
