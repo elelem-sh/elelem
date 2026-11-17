@@ -1,0 +1,117 @@
+#!/bin/sh
+
+set -eu
+[ -n "${DEBUG:-}" ] && set -x
+
+if [ "${SMOKE_INNER:-}" != "1" ]; then
+  [ $# -ge 1 ] || { echo "usage: $0 <gem> [version]" >&2; exit 2; }
+  runtime=$(command -v podman || command -v docker) || { echo "smoke: need podman or docker" >&2; exit 2; }
+  exec "$runtime" run --rm -i -e SMOKE_INNER=1 -e DEBUG="${DEBUG:-}" -e SMOKE_PREINSTALL="${SMOKE_PREINSTALL:-}" \
+    -v "$(cd "$(dirname "$0")" && pwd)/smoke-test:/smoke-test:ro,z" \
+    "${SMOKE_IMAGE:-docker.io/library/ruby:4.0}" sh /smoke-test "$@" </dev/null
+fi
+
+gem=$1
+version=${2:-}
+name=${gem#elelem-}
+[ "$gem" = elelem ] && name=""
+failures=0
+
+pass() { echo "PASS $gem: $1"; }
+fail() { echo "FAIL $gem: $1"; failures=$((failures + 1)); }
+
+case "$name" in
+  candle | ratatui)
+    apt-get update -qq >/dev/null && apt-get install -y -qq build-essential cmake libclang-dev >/dev/null
+    curl -sSf https://sh.rustup.rs | sh -s -- -y -q --profile minimal >/dev/null
+    . "$HOME/.cargo/env"
+    ;;
+  llama | llama2 | ggml | diffusion)
+    apt-get update -qq >/dev/null && apt-get install -y -qq build-essential cmake ninja-build >/dev/null
+    export CMAKE_GENERATOR=Ninja
+    ;;
+esac
+
+for pin in ${SMOKE_PREINSTALL:-}; do
+  gem install --no-document "${pin%%:*}" -v "${pin#*:}" >/dev/null
+done
+
+case "$name" in
+  llama | llama2 | ggml | diffusion)
+    gem fetch "$gem" ${version:+-v "$version"} >/dev/null
+    if tar -xOf "$gem"-*.gem data.tar.gz | tar -tzf - | grep -q '^vendor/'; then
+      pass "package contains vendor/"
+    else
+      fail "package is missing vendor/"
+    fi
+    ;;
+esac
+
+if gem install --no-document "$gem" ${version:+-v "$version"} >/tmp/install.log 2>&1; then
+  pass "installs $(gem list "^$gem\$" | tr -d '\n')"
+else
+  tail -20 /tmp/install.log
+  fail "gem install"
+  exit 1
+fi
+
+lib="elelem${name:+/$name}"
+if ruby -e "require '$lib'" >/tmp/require.log 2>&1; then
+  pass "require '$lib'"
+else
+  cat /tmp/require.log
+  fail "require '$lib'"
+fi
+
+fails_cleanly() {
+  out=$(timeout 30 "$@" 2>&1 </dev/null) && status=0 || status=$?
+  if [ "$status" = 124 ]; then
+    fail "'$*' hung"
+  elif [ "$status" = 0 ]; then
+    fail "'$*' succeeded with no credentials"
+  elif echo "$out" | grep -qE 'LoadError|cannot load such file|NoMethodError|NameError'; then
+    echo "$out" | tail -5
+    fail "'$*' crashed"
+  else
+    pass "'$*' fails cleanly: $(echo "$out" | tail -1 | cut -c1-100)"
+  fi
+}
+
+demo_runs() {
+  out=$(timeout 30 "$@" ask -p demo "echo ok" 2>&1 </dev/null) || true
+  if echo "$out" | grep -q 'exit 0'; then
+    pass "'$1 ask -p demo' runs a command"
+  else
+    echo "$out" | tail -5
+    fail "'$1 ask -p demo' did not run a command"
+  fi
+}
+
+exes=$(ruby -e 'spec = Gem::Specification.find_by_name(ARGV[0]); puts spec.executables' "$gem")
+for exe in $exes; do
+  if timeout 30 "$exe" --help >/dev/null 2>&1 </dev/null; then
+    pass "'$exe --help'"
+  else
+    fail "'$exe --help'"
+  fi
+
+  case "$exe" in
+    elelem-server | elelem-skills | elelem-evals | elelem-cxml) ;;
+    elelem) demo_runs elelem ;;
+    elelem-shell)
+      demo_runs elelem-shell
+      for provider in ollama openai anthropic; do
+        fails_cleanly elelem-shell -p "$provider" ask x
+      done
+      ;;
+    *) fails_cleanly "$exe" ask x ;;
+  esac
+done
+
+[ -z "$exes" ] && echo "note $gem: no executables, require check only"
+
+if [ "$failures" -gt 0 ]; then
+  echo "$gem: $failures check(s) failed"
+  exit 1
+fi
+echo "$gem: all checks passed"

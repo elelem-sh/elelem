@@ -1,0 +1,54 @@
+name: Smoke
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+permissions: {}
+jobs:
+  published:
+    runs-on: ubuntu-latest
+    container: ruby:4.0
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        gem:
+          - elelem
+          - elelem-anthropic
+          - elelem-cerebras
+          - elelem-cloudflare
+          - elelem-gemini
+          - elelem-github
+          - elelem-groq
+          - elelem-mcp
+          - elelem-mistral
+          - elelem-ollama
+          - elelem-openai
+          - elelem-openrouter
+          - elelem-server
+          - elelem-shell
+          - elelem-skills
+          - elelem-tools
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: sh bin/smoke-test ${{ matrix.gem }}
+        env:
+          SMOKE_INNER: "1"
+  unlocked:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: rm Gemfile.lock
+      - uses: ruby/setup-ruby@3ff19f5e2baf30647122352b96108b1fbe250c64 # v1.299.0
+        with:
+          ruby-version: "4.0"
+          bundler-cache: false
+      - run: bundle install
+      - run: bin/test
