@@ -21,6 +21,24 @@ jobs:
           ruby-version: "4.0"
           bundler-cache: true
       - run: bin/cibuild
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@3ff19f5e2baf30647122352b96108b1fbe250c64 # v1.299.0
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+      - run: bundle exec rspec
+      - run: gem build elelem.gemspec && gem install --no-document --local elelem-*.gem
+        shell: bash
+      - run: elelem --help && elelem ask -p demo "echo ok"
+        shell: bash
   release-please:
     needs: test
     runs-on: ubuntu-latest
