@@ -87,6 +87,18 @@ demo_runs() {
   fi
 }
 
+falls_back_to_demo() {
+  mkdir -p /tmp/smoke-home
+  out=$(env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u OPENAI_BASE_URL -u OLLAMA_HOST -u ELELEM_PROVIDER \
+    HOME=/tmp/smoke-home timeout 30 elelem-shell ask "echo ok" 2>&1 </dev/null) || true
+  if echo "$out" | grep -q 'exit 0' && echo "$out" | grep -q 'using the demo provider'; then
+    pass "'elelem-shell ask' with no key or model falls back to demo"
+  else
+    echo "$out" | tail -5
+    fail "'elelem-shell ask' with no key or model did not fall back to demo"
+  fi
+}
+
 exes=$(ruby -e 'spec = Gem::Specification.find_by_name(ARGV[0]); puts spec.executables' "$gem")
 for exe in $exes; do
   if timeout 30 "$exe" --help >/dev/null 2>&1 </dev/null; then
@@ -97,9 +109,10 @@ for exe in $exes; do
 
   case "$exe" in
     elelem-server | elelem-skills | elelem-evals | elelem-cxml) ;;
-    elelem) demo_runs elelem ;;
+    elelem | elelem-ratatui) demo_runs "$exe" ;;
     elelem-shell)
       demo_runs elelem-shell
+      falls_back_to_demo
       for provider in ollama openai anthropic; do
         fails_cleanly elelem-shell -p "$provider" ask x
       done
