@@ -39,6 +39,14 @@ jobs:
         shell: bash
       - run: elelem --help && elelem ask -p demo "echo ok"
         shell: bash
+      - run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch '\\Git\\(usr\\)?bin|\\msys|\\mingw' }) -join ';'
+          if (Get-Command bash -ErrorAction SilentlyContinue | Where-Object { $_.Source -notmatch 'System32|WindowsApps' }) { throw "bash still on PATH" }
+          $out = elelem ask -p demo "echo ok && echo two" 2>&1 | Out-String
+          Write-Host $out
+          if ($LASTEXITCODE -ne 0) { throw "ask failed" }
+          if ($out -notmatch 'two') { throw "cmd did not run both commands" }
+        shell: pwsh
   release-please:
     needs: test
     runs-on: ubuntu-latest

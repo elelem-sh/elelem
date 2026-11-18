@@ -11,6 +11,21 @@ RSpec.describe "the execute tool" do
     saved ? ENV.store("ELELEM_CMD_TIMEOUT", saved) : ENV.delete("ELELEM_CMD_TIMEOUT")
   end
 
+  it "says it runs commands in bash" do
+    allow(Elelem::Builtins).to receive(:shell).and_return(:bash)
+
+    expect(session.toolbox.to_a.find { |tool| tool.dig(:function, :name) == "execute" }.dig(:function, :description))
+      .to eq("Run shell command (supports pipes and redirections) in bash")
+  end
+
+  it "says it runs commands in cmd.exe and what needs Git for Windows when there is no bash" do
+    allow(Elelem::Builtins).to receive(:shell).and_return(:cmd)
+
+    expect(session.toolbox.to_a.find { |tool| tool.dig(:function, :name) == "execute" }.dig(:function, :description))
+      .to eq("Run shell command (supports pipes and redirections) in cmd.exe; " \
+             "git, glob, grep and list need Git for Windows")
+  end
+
   it "is ok when the command exits 0" do
     result = session.toolbox.run("execute", { "command" => "true" })
 
@@ -34,7 +49,7 @@ RSpec.describe "the execute tool" do
 
     session.toolbox.run("execute", { "command" => "true" })
 
-    expect(Elelem::Builtins).to have_received(:sh).with("bash", hash_including(timeout: nil))
+    expect(Elelem::Builtins).to have_received(:sh).with(anything, hash_including(timeout: nil))
   end
 
   it "takes the timeout from ELELEM_CMD_TIMEOUT" do
@@ -43,7 +58,7 @@ RSpec.describe "the execute tool" do
 
     session.toolbox.run("execute", { "command" => "true" })
 
-    expect(Elelem::Builtins).to have_received(:sh).with("bash", hash_including(timeout: 7))
+    expect(Elelem::Builtins).to have_received(:sh).with(anything, hash_including(timeout: 7))
   end
 
   it "runs without a timeout when ELELEM_CMD_TIMEOUT is negative" do
@@ -52,7 +67,7 @@ RSpec.describe "the execute tool" do
 
     session.toolbox.run("execute", { "command" => "true" })
 
-    expect(Elelem::Builtins).to have_received(:sh).with("bash", hash_including(timeout: nil))
+    expect(Elelem::Builtins).to have_received(:sh).with(anything, hash_including(timeout: nil))
   end
 
   it "runs without a timeout when ELELEM_CMD_TIMEOUT is 0" do
@@ -61,6 +76,6 @@ RSpec.describe "the execute tool" do
 
     session.toolbox.run("execute", { "command" => "true" })
 
-    expect(Elelem::Builtins).to have_received(:sh).with("bash", hash_including(timeout: nil))
+    expect(Elelem::Builtins).to have_received(:sh).with(anything, hash_including(timeout: nil))
   end
 end

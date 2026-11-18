@@ -15,7 +15,7 @@ RSpec.describe Elelem::Builtins::Terminal do
     end
   end
 
-  it "keeps the session transcript private to the user" do
+  it "keeps the session transcript private to the user", if: !Gem.win_platform? do
     terminal.say("secret")
 
     dir = File.join(ENV.fetch("XDG_STATE_HOME"), "elelem", "sessions")

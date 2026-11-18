@@ -19,7 +19,7 @@ module Elelem
       private
 
       def spawn_options(cwd)
-        @timeout ? { chdir: cwd, pgroup: true } : { chdir: cwd }
+        @timeout && !Gem.win_platform? ? { chdir: cwd, pgroup: true } : { chdir: cwd }
       end
 
       def stop_on_interrupt(pid)
@@ -53,7 +53,7 @@ module Elelem
       end
 
       def exit_status(status)
-        status.exitstatus || (@timed_out ? 124 : 1)
+        @timed_out ? 124 : status.exitstatus || 1
       end
 
       def timeout_note

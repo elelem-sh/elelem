@@ -34,7 +34,7 @@ RSpec.describe "the demo provider" do
     expect(events_for(prompt("README.md")).last).to include(name: "read", arguments: { "path" => "README.md" })
   end
 
-  it "runs a file that is executable" do
+  it "runs a file that is executable", if: !Gem.win_platform? do
     expect(events_for(prompt("bin/test")).last).to include(name: "execute", arguments: { "command" => "bin/test" })
   end
 

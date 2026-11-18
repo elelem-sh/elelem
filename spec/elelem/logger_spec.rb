@@ -11,7 +11,7 @@ RSpec.describe "Elelem.logger" do
 
   let(:log_path) { File.join(Elelem.state_dir, "elelem.log") }
 
-  it "writes to a log file only you can read" do
+  it "writes to a log file only you can read", if: !Gem.win_platform? do
     Elelem.logger.warn("hello")
 
     expect(File.stat(log_path).mode & 0o777).to eq(0o600)
