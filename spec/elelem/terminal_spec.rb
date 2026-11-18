@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Elelem::Builtins::Terminal do
+RSpec.describe Elelem::Terminal do
   subject(:terminal) { described_class.new(stream: stream) }
 
   let(:stream) { StringIO.new }

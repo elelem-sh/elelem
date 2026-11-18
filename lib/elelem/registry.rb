@@ -6,7 +6,7 @@ module Elelem
       @plugins = plugins
       @providers = {}
       @setups = {}
-      @factories = { input: Input.method(:new), output: Builtins::Terminal.method(:new) }
+      @factories = { input: Input.method(:new), output: Terminal.method(:new) }
     end
 
     def configure

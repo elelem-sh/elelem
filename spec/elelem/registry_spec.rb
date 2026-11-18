@@ -127,7 +127,7 @@ RSpec.describe Elelem::Registry do
       registry = described_class.new(plugins: core_plugins)
       registry.configure { |c| c.provider(:test) { double("provider") } }
 
-      expect(registry.build_session("test", input: Elelem::NullInput.new).output).to be_a(Elelem::Builtins::Terminal)
+      expect(registry.build_session("test", input: Elelem::NullInput.new).output).to be_a(Elelem::Terminal)
     end
 
     it "is a fallback: an output a gem registered first still wins after plugins load" do

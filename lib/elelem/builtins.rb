@@ -2,7 +2,6 @@
 
 require_relative "builtins/command"
 require_relative "builtins/shell"
-require_relative "builtins/terminal"
 
 module Elelem
   module Builtins
