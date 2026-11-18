@@ -40,12 +40,22 @@ jobs:
       - run: elelem --help && elelem ask -p demo "echo ok"
         shell: bash
       - run: |
-          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch '\\Git\\(usr\\)?bin|\\msys|\\mingw' }) -join ';'
-          if (Get-Command bash -ErrorAction SilentlyContinue | Where-Object { $_.Source -notmatch 'System32|WindowsApps' }) { throw "bash still on PATH" }
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch '\\Git\\(usr\\|ucrt64\\)?bin|\\msys|\\mingw' }) -join ';'
+          $shell = ruby -e 'require "elelem"; print Elelem::Builtins.shell'
+          if ($shell -ne 'bash') { throw "expected bash, got $shell" }
           $out = elelem ask -p demo "echo ok && echo two" 2>&1 | Out-String
           Write-Host $out
           if ($LASTEXITCODE -ne 0) { throw "ask failed" }
-          if ($out -notmatch 'two') { throw "cmd did not run both commands" }
+          if ($out -notmatch 'two') { throw "did not run both commands" }
+        shell: pwsh
+      - run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch '\\Git\\|\\msys|\\mingw' }) -join ';'
+          $shell = ruby -e 'require "elelem"; print Elelem::Builtins.shell'
+          if ($shell -ne 'cmd') { throw "expected cmd, got $shell" }
+          $out = elelem ask -p demo "echo ok && echo two" 2>&1 | Out-String
+          Write-Host $out
+          if ($LASTEXITCODE -ne 0) { throw "ask failed" }
+          if ($out -notmatch 'two') { throw "did not run both commands" }
         shell: pwsh
   release-please:
     needs: test
