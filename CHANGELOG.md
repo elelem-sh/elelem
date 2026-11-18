@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/elelem-sh/elelem/compare/v0.14.1...v0.14.2) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** drop pathname and accept the json, io-console and reline that Ruby 4.0 ships ([784cb79](https://github.com/elelem-sh/elelem/commit/784cb79823da1ca68d85c86e01eaa028fa9114d6))
+
 ## [0.14.1](https://github.com/elelem-sh/elelem/compare/v0.14.0...v0.14.1) (2026-11-17)
 
 
