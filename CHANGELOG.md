@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.3](https://github.com/elelem-sh/elelem/compare/v0.14.2...v0.14.3) (2026-11-18)
+
+
+### Bug Fixes
+
+* run commands on Windows through Git bash or cmd and stop them with taskkill ([2a5286e](https://github.com/elelem-sh/elelem/commit/2a5286eb0c7f75a620b8beeae0485745fe063f45))
+
 ## [0.14.2](https://github.com/elelem-sh/elelem/compare/v0.14.1...v0.14.2) (2026-11-18)
 
 
