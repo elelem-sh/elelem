@@ -2,11 +2,9 @@
 
 Elelem.configure do |config|
   config.setup(:execute) do |agent|
-    description = "Run shell command (supports pipes and redirections) in bash"
-    if Elelem::Builtins.shell == :cmd
-      description = "Run shell command (supports pipes and redirections) in cmd.exe; " \
-                    "git, glob, grep and list need Git for Windows"
-    end
+    cmd = Elelem::Builtins.shell == :cmd
+    description = "Run shell command (supports pipes and redirections) in " \
+                  "#{cmd ? "cmd.exe; git, glob, grep and list need Git for Windows" : "bash"}"
     agent.toolbox.add("execute",
                       description: description,
                       params: { command: { type: "string" } },

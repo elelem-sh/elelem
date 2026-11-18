@@ -10,7 +10,10 @@ module Elelem
 
       def name = bash ? :bash : :cmd
 
-      def argv(command) = bash ? [bash, "-c", command] : [command]
+      def argv(command)
+        bash = self.bash
+        bash ? [bash, "-c", command] : [command]
+      end
 
       def bash
         return "bash" unless @windows
@@ -35,8 +38,14 @@ module Elelem
 
       def system?(dir)
         path = normalize(dir)
+        windows_apps?(path) || under_system_root?(path)
+      end
+
+      def windows_apps?(path) = path.split("/").include?("windowsapps")
+
+      def under_system_root?(path)
         root = normalize(@env["SystemRoot"])
-        path.split("/").include?("windowsapps") || (!root.empty? && "#{path}/".start_with?("#{root}/"))
+        !root.empty? && "#{path}/".start_with?("#{root}/")
       end
 
       def normalize(path) = path.to_s.tr("\\", "/").downcase.chomp("/")
