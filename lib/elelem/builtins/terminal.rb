@@ -93,23 +93,14 @@ module Elelem
       def write(text)
         @stream.print text
         @at_line_start = text.end_with?("\n")
-        File.write(transcript_path, text, mode: "a", perm: 0o600)
+        transcript << text
       end
 
-      def transcript_path
-        @transcript_path ||= File.join(sessions_dir, "#{started_at}-#{Process.pid}.transcript")
-      end
+      def transcript = @transcript ||= PrivateFile.new(transcript_path, own_dir: true)
 
-      def started_at
-        Time.now.utc.strftime("%Y%m%dT%H%M%SZ")
-      end
+      def transcript_path = File.join(Elelem.state_dir, "sessions", "#{started_at}-#{Process.pid}.transcript")
 
-      def sessions_dir
-        File.join(Elelem.state_dir, "sessions").tap do |dir|
-          FileUtils.mkdir_p(dir, mode: 0o700)
-          File.chmod(0o700, dir)
-        end
-      end
+      def started_at = Time.now.utc.strftime("%Y%m%dT%H%M%SZ")
     end
   end
 end

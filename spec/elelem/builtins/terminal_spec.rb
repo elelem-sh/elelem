@@ -24,6 +24,12 @@ RSpec.describe Elelem::Builtins::Terminal do
     expect(File.read(file)).to eq("secret\n")
   end
 
+  it "writes nothing to disk until there is something to say" do
+    terminal
+
+    expect(Dir.children(ENV.fetch("XDG_STATE_HOME"))).to be_empty
+  end
+
   it "shows no dots or blank line for a reply that comes at once" do
     terminal.waiting
     terminal.say("hi")

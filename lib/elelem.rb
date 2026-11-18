@@ -12,6 +12,7 @@ require "stringio"
 require "tempfile"
 
 require_relative "elelem/version"
+require_relative "elelem/private_file"
 require_relative "elelem/output"
 require_relative "elelem/null_output"
 require_relative "elelem/input"
@@ -52,8 +53,7 @@ module Elelem
   end
 
   def self.log_file
-    FileUtils.mkdir_p(state_dir, mode: 0o700)
-    File.join(state_dir, "elelem.log").tap { |path| File.write(path, "", mode: "a", perm: 0o600) }
+    PrivateFile.new(File.join(state_dir, "elelem.log")).touch.path
   rescue SystemCallError
     $stderr
   end
