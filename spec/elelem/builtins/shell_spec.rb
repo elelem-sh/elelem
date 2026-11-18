@@ -99,6 +99,20 @@ RSpec.describe Elelem::Builtins::Shell do
     expect([shell.name, shell.argv("ls")]).to eq([:bash, [bash, "-c", "ls"]])
   end
 
+  it "is cmd on Windows when usr\\bin on PATH has no bash, though a launcher sits above it" do
+    exe("Git", "bin", "bash.exe")
+
+    expect(windows(dir("Git", "usr", "bin"), SystemRoot: dir("Windows")).name).to eq(:cmd)
+  end
+
+  it "is the bash beside a Git found in a system directory" do
+    exe("Windows", "Git", "cmd", "git.exe")
+    bash = exe("Windows", "Git", "bin", "bash.exe")
+    shell = windows(dir("Windows", "Git", "cmd"), SystemRoot: dir("Windows"))
+
+    expect([shell.name, shell.argv("ls")]).to eq([:bash, [bash, "-c", "ls"]])
+  end
+
   it "ignores the WSL launcher under windir when SystemRoot is unset" do
     exe("Windows", "System32", "bash.exe")
 

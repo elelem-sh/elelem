@@ -19,44 +19,43 @@ module Elelem
         return "bash" unless @windows
         return @bash if defined?(@bash)
 
-        @bash = path_bash || git_bash
+        @bash = bash_on_path || bash_beside_git
       end
 
       private
 
-      def path_bash
-        bash = find("bash.exe", dirs.reject { |dir| system?(dir) })
-        bash && launcher(bash)
+      def bash_on_path
+        bash = first_file(searchable_dirs.map { |dir| File.join(dir, "bash.exe") })
+        bash && (launcher_above(bash) || bash)
       end
 
-      def launcher(bash)
-        above = File.expand_path("../../bin/bash.exe", File.dirname(bash))
-        normalize(File.dirname(bash)).end_with?("/usr/bin") && File.file?(above) ? above : bash
+      def launcher_above(bash)
+        usr_bin = File.dirname(bash)
+        first_file([File.expand_path("../../bin/bash.exe", usr_bin)]) if normalize(usr_bin).end_with?("/usr/bin")
       end
 
-      def git_bash
-        dirs.filter_map { |dir| git_dir(dir) }
-            .map { |dir| File.expand_path("../bin/bash.exe", dir) }
-            .find { |bash| File.file?(bash) }
-      end
+      def bash_beside_git = first_file(git_homes.map { |home| File.join(home, "bin", "bash.exe") })
 
-      def find(name, dirs) = dirs.map { |dir| File.join(dir, name) }.find { |path| File.file?(path) }
+      def git_homes = path_dirs.filter_map { |dir| git_home(dir) }
 
-      def git_dir(dir)
-        return unless File.file?(File.join(dir, "git.exe"))
+      def git_home(dir)
+        git = File.join(dir, "git.exe")
+        return unless File.file?(git)
 
         shim = File.join(dir, "git.shim")
-        File.file?(shim) ? shim_dir(shim) : dir
+        git = scoop_target(shim) if File.file?(shim)
+        git && File.expand_path("../..", git)
       end
 
-      def shim_dir(shim)
-        target = File.read(shim).scrub[/^\W*path\s*=\s*"?([^"\r\n]+)/, 1]
-        target && File.dirname(target.strip.tr("\\", "/"))
-      end
+      def scoop_target(shim) = File.read(shim).scrub[/^\W*path\s*=\s*"?([^"\r\n]+)/, 1]&.strip&.tr("\\", "/")
 
-      def dirs = @env.fetch("PATH", "").split(File::PATH_SEPARATOR).map { |dir| dir.delete('"') }.reject(&:empty?)
+      def first_file(paths) = paths.find { |path| File.file?(path) }
 
-      def system?(dir)
+      def searchable_dirs = path_dirs.reject { |dir| system_dir?(dir) }
+
+      def path_dirs = @env.fetch("PATH", "").split(File::PATH_SEPARATOR).map { |dir| dir.delete('"') }.reject(&:empty?)
+
+      def system_dir?(dir)
         path = normalize(dir)
         windows_apps?(path) || under_system_root?(path)
       end
