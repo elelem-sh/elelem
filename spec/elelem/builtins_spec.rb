@@ -74,7 +74,7 @@ RSpec.describe Elelem::Builtins do
     it "stops a command that runs past its timeout and says so" do
       result = sleeper(1)
 
-      expect(result).to eq({ exit_status: 124, content: "hi\r\n\n[command timed out after 1s]" })
+      expect(result).to eq({ exit_status: 124, content: "hi\n\n[command timed out after 1s]" })
     end
   end
 end
