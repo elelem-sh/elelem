@@ -11,10 +11,20 @@ RSpec.describe Elelem::Builtins::Shell do
     described_class.new(env: { "PATH" => path.join(File::PATH_SEPARATOR), **env.transform_keys(&:to_s) }, windows: true)
   end
 
-  it "is bash when not on Windows" do
-    shell = described_class.new(env: { "PATH" => "" }, windows: false)
+  def posix(*path) = described_class.new(env: { "PATH" => path.join(File::PATH_SEPARATOR) }, windows: false)
+
+  it "is bash when not on Windows and bash is on PATH" do
+    File.chmod(0o755, exe("usr", "bin", "bash"))
+    shell = posix(dir("usr", "bin"))
 
     expect([shell.name, shell.argv("ls | wc")]).to eq([:bash, ["bash", "-c", "ls | wc"]])
+  end
+
+  it "is sh when not on Windows and bash is not on PATH" do
+    exe("usr", "bin", "bash")
+    shell = posix(dir("usr", "bin"))
+
+    expect([shell.name, shell.argv("ls | wc")]).to eq([:sh, ["sh", "-c", "ls | wc"]])
   end
 
   it "is cmd on Windows when the only bash is the WSL launcher in SystemRoot" do

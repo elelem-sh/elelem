@@ -22,9 +22,16 @@ RSpec.describe "the execute tool" do
   end
 
   it "says it runs commands in bash" do
-    Elelem::Builtins.finder = Elelem::Builtins::Shell.new(env: {}, windows: false)
+    Elelem::Builtins.finder = Elelem::Builtins::Shell.new(env: ENV.to_h.slice("PATH"), windows: false)
 
     expect(description).to eq("Run shell command (supports pipes and redirections) in bash")
+  end
+
+  it "says it runs commands in sh and what needs bash when there is no bash" do
+    Elelem::Builtins.finder = Elelem::Builtins::Shell.new(env: { "PATH" => "" }, windows: false)
+
+    expect(description).to eq("Run shell command (supports pipes and redirections) in sh; install bash for " \
+                              "the git, glob, grep, list and verify tools")
   end
 
   it "says it runs commands in cmd.exe and what needs Git for Windows when there is no bash" do

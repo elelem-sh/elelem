@@ -8,21 +8,31 @@ module Elelem
         @windows = windows
       end
 
-      def name = bash ? :bash : :cmd
+      def name
+        return :bash if bash
+
+        @windows ? :cmd : :sh
+      end
 
       def argv(command)
-        bash = self.bash
-        bash ? [bash, "-c", command] : [command]
+        case name
+        when :bash then [bash, "-c", command]
+        when :sh then ["sh", "-c", command]
+        else [command]
+        end
       end
 
       def bash
-        return "bash" unless @windows
         return @bash if defined?(@bash)
 
-        @bash = bash_on_path || bash_beside_git
+        @bash = @windows ? bash_on_path || bash_beside_git : posix_bash
       end
 
       private
+
+      def posix_bash
+        "bash" if path_dirs.any? { |dir| File.executable?(File.join(dir, "bash")) }
+      end
 
       def bash_on_path
         bash = first_file(searchable_dirs.map { |dir| File.join(dir, "bash.exe") })
