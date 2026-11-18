@@ -22,9 +22,12 @@ RSpec.describe "the execute tool" do
   end
 
   it "says it runs commands in bash" do
-    Elelem::Builtins.finder = Elelem::Builtins::Shell.new(env: ENV.to_h.slice("PATH"), windows: false)
+    Dir.mktmpdir do |bin|
+      FileUtils.touch(File.join(bin, "bash"))
+      Elelem::Builtins.finder = Elelem::Builtins::Shell.new(env: { "PATH" => bin }, windows: false)
 
-    expect(description).to eq("Run shell command (supports pipes and redirections) in bash")
+      expect(description).to eq("Run shell command (supports pipes and redirections) in bash")
+    end
   end
 
   it "says it runs commands in sh and what needs bash when there is no bash" do

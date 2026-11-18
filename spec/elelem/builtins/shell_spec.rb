@@ -14,14 +14,14 @@ RSpec.describe Elelem::Builtins::Shell do
   def posix(*path) = described_class.new(env: { "PATH" => path.join(File::PATH_SEPARATOR) }, windows: false)
 
   it "is bash when not on Windows and bash is on PATH" do
-    File.chmod(0o755, exe("usr", "bin", "bash"))
+    exe("usr", "bin", "bash")
     shell = posix(dir("usr", "bin"))
 
     expect([shell.name, shell.argv("ls | wc")]).to eq([:bash, ["bash", "-c", "ls | wc"]])
   end
 
   it "is sh when not on Windows and bash is not on PATH" do
-    exe("usr", "bin", "bash")
+    exe("usr", "bin", "sh")
     shell = posix(dir("usr", "bin"))
 
     expect([shell.name, shell.argv("ls | wc")]).to eq([:sh, ["sh", "-c", "ls | wc"]])

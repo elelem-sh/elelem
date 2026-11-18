@@ -31,7 +31,7 @@ module Elelem
       private
 
       def posix_bash
-        "bash" if path_dirs.any? { |dir| File.executable?(File.join(dir, "bash")) }
+        "bash" if path_dirs.any? { |dir| File.file?(File.join(dir, "bash")) }
       end
 
       def bash_on_path
