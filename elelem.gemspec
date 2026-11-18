@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
     "Rakefile",
     "exe/elelem",
     "lib/elelem.rb"
-  ] + Dir["lib/elelem/*.rb"] + Dir["lib/elelem/{builtins,plugins}/*.rb"] + Dir["lib/elelem/prompts/**/*.erb"]
+  ] + Dir["lib/elelem/*.rb"] + Dir["lib/elelem/{builtins,plugins,tool}/*.rb"] + Dir["lib/elelem/prompts/**/*.erb"]
   spec.bindir = "exe"
   spec.executables = ["elelem"]
   spec.require_paths = ["lib"]
