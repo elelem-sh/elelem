@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.4](https://github.com/elelem-sh/elelem/compare/v0.14.3...v0.14.4) (2026-11-18)
+
+
+### Bug Fixes
+
+* find Git bash behind Scoop shims and usr\bin, exclude the WSL launcher without SystemRoot and only report a timeout for a command still running ([d6d90b7](https://github.com/elelem-sh/elelem/commit/d6d90b7e190d8da8a0017d4c3be574c4b4a2c240))
+
 ## [0.14.3](https://github.com/elelem-sh/elelem/compare/v0.14.2...v0.14.3) (2026-11-18)
 
 
