@@ -58,7 +58,7 @@ jobs:
           if ($out -notmatch 'two') { throw "did not run both commands" }
         shell: pwsh
   release-please:
-    needs: test
+    needs: [test, windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
