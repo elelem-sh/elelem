@@ -7,11 +7,11 @@ module Elelem
     def initialize
       @tools = {}
       @aliases = {}
-      @hooks = { before: Hash.new { |h, k| h[k] = [] }, after: Hash.new { |h, k| h[k] = [] } }
+      @hooks = %i[before after].to_h { |type| [type, Hash.new { |hooks, name| hooks[name] = [] }] }
     end
 
     def clear!
-      [@tools, @aliases, @hooks[:before], @hooks[:after]].each(&:clear)
+      [@tools, @aliases, *@hooks.values].each(&:clear)
     end
 
     def add(name, description:, params: {}, required: [], aliases: [], &handler)
@@ -19,13 +19,8 @@ module Elelem
       @tools[name] = Tool.new(name, description:, params:, required:, aliases:, &handler)
     end
 
-    def before(tool_name = :*, &block)
-      @hooks[:before][tool_name] << block
-    end
-
-    def after(tool_name = :*, &block)
-      @hooks[:after][tool_name] << block
-    end
+    def before(tool_name = :*, &) = hook(:before, tool_name, &)
+    def after(tool_name = :*, &) = hook(:after, tool_name, &)
 
     def tool_for(name)
       tools[name] || tools[@aliases[name]]
@@ -44,6 +39,8 @@ module Elelem
     end
 
     private
+
+    def hook(type, name, &block) = @hooks[type][name] << block
 
     def invalid(name, tool, args)
       errors = tool ? tool.validate(args) : ["unknown tool: #{name.inspect}. Available: #{tools.keys.join(", ")}."]
