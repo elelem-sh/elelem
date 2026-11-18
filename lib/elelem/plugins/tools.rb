@@ -4,14 +4,13 @@ Elelem.configure do |config|
   config.setup(:tools) do |agent|
     completions = -> { agent.toolbox.tools.keys }
     agent.commands.register("tools", description: "List available tools", completions: completions) do |arg|
-      tool = agent.toolbox.tool_for(arg) if arg && !arg.empty?
-      if tool
-        agent.output.say JSON.pretty_generate(tool.to_h[:function].merge(aliases: tool.aliases)), as: :markdown
-      elsif arg && !arg.empty?
-        agent.output.say "Unknown tool: #{arg}"
-      else
+      if arg.to_s.empty?
         rows = agent.toolbox.tools.values.map { |t| "| #{t.name} | #{t.description.lines.first.chomp} |" }
         agent.output.say "| Tool | Description |\n|------|-------------|\n#{rows.join("\n")}", as: :markdown
+      elsif (tool = agent.toolbox.tool_for(arg))
+        agent.output.say JSON.pretty_generate(tool.to_h[:function].merge(aliases: tool.aliases)), as: :markdown
+      else
+        agent.output.say "Unknown tool: #{arg}"
       end
     end
   end

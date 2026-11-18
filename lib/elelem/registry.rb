@@ -43,14 +43,17 @@ module Elelem
     def build_session(provider, toolbox: Toolbox.new, input: nil, output: nil, provider_options: {},
                       template: nil, system_prompt: nil)
       commands = Commands.new
-      agent = Agent.new(build_provider(provider, **provider_options), toolbox:, template:, system_prompt:,
-                                                                      output: output || @factories[:output].call)
+      agent = build_agent(provider, provider_options, toolbox:, template:, system_prompt:, output:)
       session = Session.new(agent, input: input || @factories[:input].call(commands: commands), commands: commands)
       apply(session)
       session
     end
 
     private
+
+    def build_agent(provider, provider_options, output:, **)
+      Agent.new(build_provider(provider, **provider_options), output: output || @factories[:output].call, **)
+    end
 
     def require_gem(name)
       require "elelem/#{name}"

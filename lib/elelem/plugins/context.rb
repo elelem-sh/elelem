@@ -2,24 +2,24 @@
 
 Elelem.configure do |config|
   config.setup(:context) do |agent|
+    preview = lambda do |message|
+      content = message[:content].to_s
+      "#{content.lines.first&.strip&.slice(0, 60)}#{"..." if content.length > 60}"
+    end
+
     agent.commands.register("context", description: "Show conversation context") do |args|
       messages = agent.conversation.to_a
 
       case args
       when nil, ""
-        messages.each_with_index do |msg, i|
-          role = msg[:role]
-          preview = msg[:content].to_s.lines.first&.strip&.slice(0, 60) || ""
-          preview += "..." if msg[:content].to_s.length > 60
-          agent.output.say "  #{i + 1}. #{role}: #{preview}"
+        messages.each.with_index(1) do |message, number|
+          agent.output.say "  #{number}. #{message[:role]}: #{preview.call(message)}"
         end
       when "json"
         agent.output.say JSON.pretty_generate(messages)
       when /^\d+$/
-        index = args.to_i - 1
-        if index >= 0 && index < messages.length
-          content = messages[index][:content].to_s
-          agent.output.say(content, as: :markdown)
+        if args.to_i.between?(1, messages.length)
+          agent.output.say(messages[args.to_i - 1][:content].to_s, as: :markdown)
         else
           agent.output.say "  Invalid index: #{args}"
         end

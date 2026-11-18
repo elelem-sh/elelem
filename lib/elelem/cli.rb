@@ -65,8 +65,10 @@ module Elelem
 
     def prompt_for_ask
       prompt = @args.join(" ")
-      $stdin.stat.then { |s| s.pipe? || s.file? } ? "#{prompt}\n\n```\n#{$stdin.read}\n```" : prompt
+      stdin_piped? ? "#{prompt}\n\n```\n#{$stdin.read}\n```" : prompt
     end
+
+    def stdin_piped? = $stdin.stat.then { |stat| stat.pipe? || stat.file? }
 
     def print_reply(reply, piped:)
       abort "elelem: no reply" if reply.to_s.strip.empty?

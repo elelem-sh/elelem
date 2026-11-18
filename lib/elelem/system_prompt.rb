@@ -18,7 +18,8 @@ module Elelem
     private
 
     def agents_md
-      [global_agents_md, project_agents_md].compact.then { |parts| parts.empty? ? nil : parts.join("\n\n") }
+      parts = [global_agents_md, project_agents_md].compact
+      parts.join("\n\n") unless parts.empty?
     end
 
     def global_agents_md
