@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/elelem-sh/elelem/compare/v0.15.0...v0.15.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* run commands with sh when bash is missing, as on Alpine ([6522589](https://github.com/elelem-sh/elelem/commit/65225891e2250c13a233b16ff63e1d148f293e9d))
+
 ## [0.15.0](https://github.com/elelem-sh/elelem/compare/v0.14.4...v0.15.0) (2026-11-18)
 
 
