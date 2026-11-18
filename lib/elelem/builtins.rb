@@ -7,7 +7,7 @@ require_relative "builtins/terminal"
 module Elelem
   module Builtins
     def self.sh(cmd, args: [], cwd: Dir.pwd, env: {}, timeout: nil, &)
-      Command.new(timeout).run(env, [cmd, *args], cwd, &)
+      Command.new(timeout:).run([cmd, *args], env:, cwd:, &)
     end
 
     def self.truncate(content, limit: 10_000)
@@ -27,22 +27,6 @@ module Elelem
     def self.finder=(shell)
       @finder = shell
     end
-
-    def self.terminate(pid)
-      return taskkill(pid) if Gem.win_platform?
-
-      kill_group(pid)
-    end
-
-    def self.taskkill(pid) = system("taskkill", "/T", "/F", "/PID", pid.to_s, out: File::NULL, err: File::NULL)
-
-    def self.kill_group(pid)
-      Process.kill("TERM", -pid)
-      sleep 0.5
-      Process.kill("KILL", -pid)
-    rescue Errno::ESRCH
-      nil
-    end
-    private_class_method :finder, :taskkill, :kill_group
+    private_class_method :finder
   end
 end

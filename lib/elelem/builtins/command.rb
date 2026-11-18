@@ -3,29 +3,31 @@
 module Elelem
   module Builtins
     class Command
-      def initialize(timeout)
+      def initialize(timeout:)
         @timeout = timeout
         @timed_out = false
         @output = StringIO.new
       end
 
-      def run(env, argv, cwd, &)
+      def run(argv, env:, cwd:, &)
         Open3.popen2e(env, *argv, **spawn_options(cwd)) do |stdin, out, process|
           stdin.close
-          stop_on_interrupt(process.pid) { finish(process, out, &) }
+          stop_on_interrupt(process) { finish(process, out, &) }
         end
       end
 
       private
 
       def spawn_options(cwd)
-        @timeout && !Gem.win_platform? ? { chdir: cwd, pgroup: true } : { chdir: cwd }
+        own_group? ? { chdir: cwd, pgroup: true } : { chdir: cwd }
       end
 
-      def stop_on_interrupt(pid)
+      def own_group? = @timeout && !Gem.win_platform?
+
+      def stop_on_interrupt(process)
         yield
       rescue Interrupt, SystemExit
-        Builtins.terminate(pid) if @timeout
+        stop(process) if @timeout
         raise
       end
 
@@ -40,9 +42,23 @@ module Elelem
         @timeout && Thread.new do
           sleep(@timeout)
           @timed_out = process.alive?
-          Builtins.terminate(process.pid) if @timed_out || !Gem.win_platform?
+          stop(process) if @timed_out || own_group?
         end
       end
+
+      def stop(process)
+        own_group? ? kill_group(process.pid) : taskkill(process.pid)
+      end
+
+      def kill_group(pid)
+        Process.kill("TERM", -pid)
+        sleep 0.5
+        Process.kill("KILL", -pid)
+      rescue Errno::ESRCH
+        nil
+      end
+
+      def taskkill(pid) = system("taskkill", "/T", "/F", "/PID", pid.to_s, out: File::NULL, err: File::NULL)
 
       def stream_lines(out)
         out.each_line do |line|
