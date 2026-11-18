@@ -55,7 +55,8 @@ module Elelem
       "#{key}: expected one of #{enum.map(&:to_json).join(", ")}" if enum.is_a?(Array) && !enum.include?(value)
     end
 
-    def type?(value, types) = types.empty? || (types - TYPES.keys).any? || types.intersect?(types_of(value))
+    def type?(value, types) = types.empty? || unknown_type?(types) || types.intersect?(types_of(value))
+    def unknown_type?(types) = (types - TYPES.keys).any?
     def type_of(value) = types_of(value).first || value.class.name
     def types_of(value) = TYPES.select { |_, test| test.call(value) }.keys
   end
