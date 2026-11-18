@@ -30,17 +30,17 @@ module Elelem
       end
 
       def finish(process, out, &)
-        watchdog = start_watchdog(process.pid)
+        watchdog = start_watchdog(process)
         stream_lines(out, &)
         @timed_out ? watchdog.join : watchdog&.kill
         { exit_status: exit_status(process.value), content: Builtins.truncate(@output.string) + timeout_note }
       end
 
-      def start_watchdog(pid)
+      def start_watchdog(process)
         @timeout && Thread.new do
           sleep(@timeout)
-          @timed_out = true
-          Builtins.terminate(pid)
+          @timed_out = process.alive?
+          Builtins.terminate(process.pid) if @timed_out || !Gem.win_platform?
         end
       end
 

@@ -24,15 +24,35 @@ module Elelem
 
       private
 
-      def path_bash = find("bash.exe", dirs.reject { |dir| system?(dir) })
+      def path_bash
+        bash = find("bash.exe", dirs.reject { |dir| system?(dir) })
+        bash && launcher(bash)
+      end
+
+      def launcher(bash)
+        above = File.expand_path("../../bin/bash.exe", File.dirname(bash))
+        normalize(File.dirname(bash)).end_with?("/usr/bin") && File.file?(above) ? above : bash
+      end
 
       def git_bash
-        git = find("git.exe", dirs)
-        bash = git && File.expand_path("../bin/bash.exe", File.dirname(git))
-        bash if bash && File.file?(bash)
+        dirs.filter_map { |dir| git_dir(dir) }
+            .map { |dir| File.expand_path("../bin/bash.exe", dir) }
+            .find { |bash| File.file?(bash) }
       end
 
       def find(name, dirs) = dirs.map { |dir| File.join(dir, name) }.find { |path| File.file?(path) }
+
+      def git_dir(dir)
+        return unless File.file?(File.join(dir, "git.exe"))
+
+        shim = File.join(dir, "git.shim")
+        File.file?(shim) ? shim_dir(shim) : dir
+      end
+
+      def shim_dir(shim)
+        target = File.read(shim).scrub[/^\W*path\s*=\s*"?([^"\r\n]+)/, 1]
+        target && File.dirname(target.strip.tr("\\", "/"))
+      end
 
       def dirs = @env.fetch("PATH", "").split(File::PATH_SEPARATOR).map { |dir| dir.delete('"') }.reject(&:empty?)
 
@@ -44,8 +64,11 @@ module Elelem
       def windows_apps?(path) = path.split("/").include?("windowsapps")
 
       def under_system_root?(path)
-        root = normalize(@env["SystemRoot"])
-        !root.empty? && "#{path}/".start_with?("#{root}/")
+        "#{path}/".start_with?("#{system_root}/")
+      end
+
+      def system_root
+        normalize(@env.values_at("SystemRoot", "windir").compact.reject(&:empty?).first || "C:\\Windows")
       end
 
       def normalize(path) = path.to_s.tr("\\", "/").downcase.chomp("/")

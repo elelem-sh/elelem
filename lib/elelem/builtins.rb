@@ -24,6 +24,10 @@ module Elelem
 
     def self.finder = @finder ||= Shell.new
 
+    def self.finder=(shell)
+      @finder = shell
+    end
+
     def self.terminate(pid)
       return taskkill(pid) if Gem.win_platform?
 

@@ -11,21 +11,27 @@ RSpec.describe "the execute tool" do
     saved ? ENV.store("ELELEM_CMD_TIMEOUT", saved) : ENV.delete("ELELEM_CMD_TIMEOUT")
   end
 
+  around do |example|
+    example.run
+  ensure
+    Elelem::Builtins.finder = nil
+  end
+
   def description
     session.toolbox.to_a.find { |tool| tool.dig(:function, :name) == "execute" }.dig(:function, :description)
   end
 
   it "says it runs commands in bash" do
-    allow(Elelem::Builtins).to receive(:shell).and_return(:bash)
+    Elelem::Builtins.finder = Elelem::Builtins::Shell.new(env: {}, windows: false)
 
     expect(description).to eq("Run shell command (supports pipes and redirections) in bash")
   end
 
   it "says it runs commands in cmd.exe and what needs Git for Windows when there is no bash" do
-    allow(Elelem::Builtins).to receive(:shell).and_return(:cmd)
+    Elelem::Builtins.finder = Elelem::Builtins::Shell.new(env: { "PATH" => "" }, windows: true)
 
-    expect(description).to eq("Run shell command (supports pipes and redirections) in cmd.exe; " \
-                              "git, glob, grep and list need Git for Windows")
+    expect(description).to eq("Run shell command (supports pipes and redirections) in cmd.exe; install Git for " \
+                              "Windows for bash and the git, glob, grep, list and verify tools")
   end
 
   it "is ok when the command exits 0" do
