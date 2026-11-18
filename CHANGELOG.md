@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.0](https://github.com/elelem-sh/elelem/compare/v0.14.4...v0.15.0) (2026-11-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* move the terminal output beside the other outputs as Elelem::Terminal
+* let a command stop its own process tree
+
+### Code Refactoring
+
+* let a command stop its own process tree ([dc10de7](https://github.com/elelem-sh/elelem/commit/dc10de7b80b2ee89372ad3b763b637aed7bb135b))
+* move the terminal output beside the other outputs as Elelem::Terminal ([0926deb](https://github.com/elelem-sh/elelem/commit/0926deb5217a438d20a976513caaea43587331dd))
+
 ## [0.14.4](https://github.com/elelem-sh/elelem/compare/v0.14.3...v0.14.4) (2026-11-18)
 
 
