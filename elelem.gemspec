@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "io-console", ">= 0.8"
   spec.add_dependency "json", ">= 2.18"
   spec.add_dependency "logger", "~> 1.7"
+  spec.add_dependency "net-http", "~> 0.9"
   spec.add_dependency "open3", "~> 0.2"
   spec.add_dependency "optparse", "~> 0.8"
   spec.add_dependency "reline", ">= 0.6"
