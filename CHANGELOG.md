@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/elelem-sh/elelem/compare/v0.15.1...v0.16.0) (2026-11-19)
+
+
+### Features
+
+* add a keep-alive HTTP client that retries busy servers ([c69d8e0](https://github.com/elelem-sh/elelem/commit/c69d8e09c0738ba5822b296697eddf36a298b896))
+
 ## [0.15.1](https://github.com/elelem-sh/elelem/compare/v0.15.0...v0.15.1) (2026-11-18)
 
 
