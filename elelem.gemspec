@@ -21,8 +21,6 @@ Gem::Specification.new do |spec|
 
   spec.files = [
     "LICENSE.txt",
-    "README.md",
-    "Rakefile",
     "exe/elelem",
     "lib/elelem.rb"
   ] + Dir["lib/elelem/*.rb"] + Dir["lib/elelem/{builtins,plugins,tool}/*.rb"] + Dir["lib/elelem/prompts/**/*.erb"]
