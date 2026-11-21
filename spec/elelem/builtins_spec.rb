@@ -43,6 +43,10 @@ RSpec.describe Elelem::Builtins do
     expect(run("echo hi; exit 3", 300)).to include(exit_status: 3)
   end
 
+  it "counts the characters it elides" do
+    expect(described_class.truncate("abcdefg", limit: 5)).to eq("ab\n[3 characters elided]\nfg")
+  end
+
   context "when the shell is cmd", if: Gem.win_platform? do
     around do |example|
       described_class.finder = Elelem::Builtins::Shell.new(env: { "PATH" => "" }, windows: true)

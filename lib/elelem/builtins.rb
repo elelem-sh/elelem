@@ -13,7 +13,7 @@ module Elelem
       return content if content.length <= limit
 
       half = limit / 2
-      elided = content.length - limit
+      elided = content.length - (half * 2)
       "#{content[0, half]}\n[#{elided} characters elided]\n#{content[-half, half]}"
     end
 
