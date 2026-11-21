@@ -37,6 +37,16 @@ RSpec.describe Elelem::Plugins do
     $plugins_spec_count = nil
   end
 
+  it "loads a directory named twice only once, as ~/.agents/plugins is when run from home" do
+    File.write(File.join(plugin_dir, "counter.rb"), "$plugins_spec_count = ($plugins_spec_count || 0) + 1")
+
+    described_class.new(load_paths: [plugin_dir, "#{plugin_dir}/"]).load!
+
+    expect($plugins_spec_count).to eq(1)
+  ensure
+    $plugins_spec_count = nil
+  end
+
   it "reloads when forced" do
     File.write(File.join(plugin_dir, "counter.rb"), "$plugins_spec_count = ($plugins_spec_count || 0) + 1")
 
