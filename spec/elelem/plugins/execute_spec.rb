@@ -9,11 +9,6 @@ RSpec.describe "the execute tool" do
     example.run
   ensure
     saved ? ENV.store("ELELEM_CMD_TIMEOUT", saved) : ENV.delete("ELELEM_CMD_TIMEOUT")
-  end
-
-  around do |example|
-    example.run
-  ensure
     Elelem::Builtins.finder = nil
   end
 

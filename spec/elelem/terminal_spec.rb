@@ -5,16 +5,6 @@ RSpec.describe Elelem::Terminal do
 
   let(:stream) { StringIO.new }
 
-  around do |example|
-    Dir.mktmpdir do |dir|
-      saved = ENV.fetch("XDG_STATE_HOME", nil)
-      ENV["XDG_STATE_HOME"] = dir
-      example.run
-    ensure
-      saved ? ENV.store("XDG_STATE_HOME", saved) : ENV.delete("XDG_STATE_HOME")
-    end
-  end
-
   it "keeps the session transcript private to the user", if: !Gem.win_platform? do
     terminal.say("secret")
 

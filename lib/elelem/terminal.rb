@@ -77,7 +77,7 @@ module Elelem
 
     def gap
       stop_dots
-      write("\n") unless @at_line_start
+      end_line
     end
 
     def stop_dots
@@ -86,6 +86,10 @@ module Elelem
       @dots_thread[:stop] = true
       @dots_thread.join
       @dots_thread = nil
+      end_line
+    end
+
+    def end_line
       write("\n") unless @at_line_start
     end
 

@@ -4,8 +4,6 @@ require "elelem/http"
 require "socket"
 
 RSpec.describe Elelem::HTTP do
-  # Answers each request with the next reply. A :hang_up after a reply closes
-  # the connection, as a server does when a keep-alive connection idles out.
   let(:server_class) do
     Class.new do
       attr_reader :connections, :requests, :last_request
@@ -37,7 +35,12 @@ RSpec.describe Elelem::HTTP do
       def answer(socket)
         @requests += 1
         socket.write(@replies.shift)
-        socket.close if @replies.first == :hang_up && @replies.shift
+        idle_out(socket) if @replies.first == :hang_up
+      end
+
+      def idle_out(socket)
+        @replies.shift
+        socket.close
       end
 
       def read_request(socket)

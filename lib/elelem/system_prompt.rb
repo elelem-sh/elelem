@@ -18,20 +18,10 @@ module Elelem
     private
 
     def agents_md
-      parts = [global_agents_md, project_agents_md].compact
+      parts = [USER_AGENTS_MD, nearest_agents_md].compact.select(&:exist?).map(&:read)
       parts.join("\n\n") unless parts.empty?
     end
 
-    def global_agents_md
-      USER_AGENTS_MD.read if USER_AGENTS_MD.exist?
-    end
-
-    def project_agents_md
-      Pathname.pwd.ascend.each do |dir|
-        file = dir / "AGENTS.md"
-        return file.read if file.exist?
-      end
-      nil
-    end
+    def nearest_agents_md = Pathname.pwd.ascend.map { |dir| dir / "AGENTS.md" }.find(&:exist?)
   end
 end

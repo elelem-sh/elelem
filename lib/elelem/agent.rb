@@ -9,7 +9,7 @@ module Elelem
       @provider = provider
       @toolbox = toolbox
       @output = output
-      @conversation = Conversation.new(template: template, system_prompt: system_prompt)
+      @conversation = Conversation.new(template:, system_prompt:)
     end
 
     def turn(prompt)

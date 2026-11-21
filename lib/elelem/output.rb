@@ -46,8 +46,6 @@ module Elelem
       @stream.print text
     end
 
-    def blank?(text)
-      text.nil? || text.to_s.strip.empty?
-    end
+    def blank?(text) = text.to_s.strip.empty?
   end
 end

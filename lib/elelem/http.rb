@@ -4,10 +4,6 @@ require "json"
 require "net/http"
 
 module Elelem
-  # A keep-alive client for providers that stream their replies.
-  # Before a reply arrives it retries busy servers and broken connections.
-  # Once the caller has the reply it never retries, so no output repeats.
-  # One request at a time: give each provider its own client.
   class HTTP
     BROKEN = [Net::OpenTimeout, Errno::ECONNRESET, Errno::EPIPE, EOFError].freeze
     BUSY = %w[429 500 502 503 504 529].freeze
@@ -17,38 +13,32 @@ module Elelem
     class Busy < StandardError
       attr_reader :wait
 
-      def initialize(reply, wait)
+      def initialize(message, wait)
         @wait = wait
-        super("HTTP #{reply.code}: #{reply.body}")
+        super(message)
       end
     end
+    private_constant :Busy
 
     def self.lines(response, &)
-      rest = response_lines(response, &)
-      complete_lines("#{rest}\n", &)
+      unfinished = ""
+      response.read_body { |chunk| unfinished = finished_lines(unfinished + chunk, &) }
+      finished_lines("#{unfinished}\n", &)
     end
 
-    # The data of each server-sent event.
     def self.events(response)
       lines(response) do |line|
-        data = line.delete_prefix("data:").strip if line.start_with?("data:")
-        yield data unless data.nil? || data.empty? || data == "[DONE]"
+        data = line[/\Adata:(.*)/, 1].to_s.strip
+        yield data unless ["", "[DONE]"].include?(data)
       end
     end
 
-    def self.response_lines(response, &)
-      rest = +""
-      response.read_body { |chunk| rest = complete_lines(rest + chunk, &) }
-      rest
+    def self.finished_lines(text)
+      finished, _, unfinished = text.rpartition("\n")
+      finished.split("\n").map(&:strip).each { |line| yield line unless line.empty? }
+      unfinished
     end
-
-    # Yields each complete, non-blank line and returns the incomplete rest.
-    def self.complete_lines(text)
-      complete, _, rest = text.rpartition("\n")
-      complete.split("\n").map(&:strip).each { |line| yield line unless line.empty? }
-      rest
-    end
-    private_class_method :response_lines, :complete_lines
+    private_class_method :finished_lines
 
     def initialize(read_timeout: 3600, open_timeout: 10, retries: 2)
       @options = { read_timeout:, open_timeout:, keep_alive_timeout: KEEP_ALIVE }
@@ -66,14 +56,17 @@ module Elelem
     def deliver(uri, request, attempt, &)
       exchange(uri, request, attempt, &)
     rescue Busy, *BROKEN => e
-      raise if @replied || attempt >= @retries
+      raise unless retry?(attempt)
 
-      pause(e.is_a?(Busy) ? e.wait : 2**attempt, e)
+      pause(e.is_a?(Busy) ? e.wait : backoff(attempt), e)
       deliver(uri, request, attempt + 1, &)
     end
 
+    def retry?(attempt) = !@handed_over && attempt < @retries
+    def backoff(attempt) = 2**attempt
+
     def exchange(uri, request, attempt, &)
-      @replied = false
+      @handed_over = false
       response = connection(uri).request(request) { |reply| hand_over(reply, attempt, &) }
     ensure
       disconnect unless response
@@ -81,19 +74,21 @@ module Elelem
 
     def hand_over(reply, attempt)
       check(reply, attempt)
-      @replied = true
+      @handed_over = true
       yield reply
     end
 
     def check(reply, attempt)
       return if reply.is_a?(Net::HTTPSuccess)
-      raise Busy.new(reply, wait_for(reply, attempt)) if BUSY.include?(reply.code) && attempt < @retries
 
-      raise "HTTP #{reply.code}: #{reply.body}"
+      failure = "HTTP #{reply.code}: #{reply.body}"
+      raise Busy.new(failure, wait_for(reply, attempt)) if BUSY.include?(reply.code) && retry?(attempt)
+
+      raise failure
     end
 
     def wait_for(reply, attempt)
-      seconds = Float(reply["retry-after"], exception: false) || (2**attempt)
+      seconds = Float(reply["retry-after"], exception: false) || backoff(attempt)
       raise "HTTP #{reply.code}: busy for #{seconds}s, try again later" if seconds > LONGEST_WAIT
 
       seconds

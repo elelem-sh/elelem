@@ -17,7 +17,7 @@ Elelem.configure do |config|
         end
       when "json"
         agent.output.say JSON.pretty_generate(messages)
-      when /^\d+$/
+      when /\A\d+\z/
         if args.to_i.between?(1, messages.length)
           agent.output.say(messages[args.to_i - 1][:content].to_s, as: :markdown)
         else
