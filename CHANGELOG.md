@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.0](https://github.com/elelem-sh/elelem/compare/v0.17.0...v0.18.0) (2026-11-24)
+
+
+### Features
+
+* name the version, provider and model in the banner with a pointer to /help ([a00dc25](https://github.com/elelem-sh/elelem/commit/a00dc2538cc5fafda9404b8cd858e61e0aa50da2))
+
+
+### Bug Fixes
+
+* read returns the whole file up to 64 KB and refuses larger files instead of eliding the middle ([dadece0](https://github.com/elelem-sh/elelem/commit/dadece0397623a621b75055db6e98b0ea4fb9b0d))
+
 ## [0.17.0](https://github.com/elelem-sh/elelem/compare/v0.16.1...v0.17.0) (2026-11-24)
 
 
