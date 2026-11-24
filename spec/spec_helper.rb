@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# The banner is UTF-8; read files and captured output as UTF-8 whatever the locale.
+Encoding.default_external = Encoding::UTF_8
+
 require "simplecov"
 SimpleCov.start do
   command_name "RSpec"

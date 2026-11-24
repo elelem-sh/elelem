@@ -39,14 +39,19 @@ module Elelem
   private_constant :OLD_LOGS_KEPT, :LOG_SIZE_LIMIT
 
   def self.build(provider: "demo", **) = Config.build_session(provider, **)
-  def self.start(**) = Repl.new(build(**)).run
+  def self.start(**) = repl(build(**), **).run
   def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)
 
   def self.serve(path, **)
     sock = Sock.new(path)
-    repl = Repl.new(build(input: SockInput.new(stream: sock), output: Output.new(stream: sock), **))
+    repl = repl(build(input: SockInput.new(stream: sock), output: Output.new(stream: sock), **), **)
     sock.each_client { repl.run }
   end
+
+  def self.repl(session, provider: "demo", provider_options: {}, **)
+    Repl.new(session, provider:, model: provider_options[:model])
+  end
+  private_class_method :repl
 
   def self.state_dir
     File.join(ENV.fetch("XDG_STATE_HOME", File.expand_path("~/.local/state")), "elelem")

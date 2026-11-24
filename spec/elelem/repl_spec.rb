@@ -39,7 +39,26 @@ RSpec.describe Elelem::Repl do
 
     described_class.new(session).run
 
-    expect(said.first).to eq("elelem v#{Elelem::VERSION}")
+    expect(said.first).to eq("elelem v#{Elelem::VERSION} · /help")
+  end
+
+  it "names the provider and the model it was started with in the banner" do
+    output, said = capturing_output
+    session = session_with(input: input_returning(nil), output: output)
+
+    described_class.new(session, provider: "anthropic", model: "claude").run
+
+    expect(said.first).to eq("elelem v#{Elelem::VERSION} · anthropic (claude) · /help")
+  end
+
+  it "names the model the provider reports over the one it was started with" do
+    output, said = capturing_output
+    session = session_with(input: input_returning(nil), output: output)
+    session.provider.define_singleton_method(:model) { "qwen.gguf" }
+
+    described_class.new(session, provider: "llama").run
+
+    expect(said.first).to eq("elelem v#{Elelem::VERSION} · llama (qwen.gguf) · /help")
   end
 
   it "skips empty lines without turning or dispatching a command" do
@@ -48,7 +67,7 @@ RSpec.describe Elelem::Repl do
 
     described_class.new(session).run
 
-    expect(said).to eq(["elelem v#{Elelem::VERSION}"])
+    expect(said).to eq(["elelem v#{Elelem::VERSION} · /help"])
   end
 
   it "dispatches a plain line as a turn" do
