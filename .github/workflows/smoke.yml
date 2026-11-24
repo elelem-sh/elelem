@@ -21,6 +21,7 @@ jobs:
           - elelem-gemini
           - elelem-github
           - elelem-groq
+          - elelem-llama
           - elelem-mcp
           - elelem-mistral
           - elelem-ollama
