@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.16.1](https://github.com/elelem-sh/elelem/compare/v0.16.0...v0.16.1) (2026-11-21)
+
+
+### Bug Fixes
+
+* count the characters truncate drops for an odd limit ([4c3b14a](https://github.com/elelem-sh/elelem/commit/4c3b14a6d9e9ae94367a63115814c263ad98ab71))
+* load a plugin directory once when the home and project paths are the same ([1c9293c](https://github.com/elelem-sh/elelem/commit/1c9293c57e4a371aefcfc52932509710d534dde8))
+
 ## [0.16.0](https://github.com/elelem-sh/elelem/compare/v0.15.1...v0.16.0) (2026-11-19)
 
 
