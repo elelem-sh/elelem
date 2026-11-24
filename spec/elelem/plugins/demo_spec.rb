@@ -44,7 +44,7 @@ RSpec.describe "the demo provider" do
     expect(session.turn("@README.md")).to eq("read README.md")
   end
 
-  it "runs only x for `cat file | elelem ask x`" do
+  it "runs only x for `cat file | elelem x`" do
     events = events_for(prompt("x\n\n```\nfile contents\n```"))
 
     expect(events.last[:arguments]).to eq("command" => "x")

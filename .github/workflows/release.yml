@@ -37,13 +37,13 @@ jobs:
       - run: bundle exec rspec
       - run: gem build elelem.gemspec && gem install --no-document --local elelem-*.gem
         shell: bash
-      - run: elelem --help && elelem ask -p demo "echo ok"
+      - run: elelem --help && elelem -p demo "echo ok"
         shell: bash
       - run: |
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch '\\Git\\(usr\\|ucrt64\\)?bin|\\msys|\\mingw' }) -join ';'
           $shell = ruby -e 'require "elelem"; print Elelem::Builtins.shell'
           if ($shell -ne 'bash') { throw "expected bash, got $shell" }
-          $out = elelem ask -p demo "echo ok && echo two" 2>&1 | Out-String
+          $out = elelem -p demo "echo ok && echo two" 2>&1 | Out-String
           Write-Host $out
           if ($LASTEXITCODE -ne 0) { throw "ask failed" }
           if ($out -notmatch 'two') { throw "did not run both commands" }
@@ -52,7 +52,7 @@ jobs:
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch '\\Git\\|\\msys|\\mingw' }) -join ';'
           $shell = ruby -e 'require "elelem"; print Elelem::Builtins.shell'
           if ($shell -ne 'cmd') { throw "expected cmd, got $shell" }
-          $out = elelem ask -p demo "echo ok && echo two" 2>&1 | Out-String
+          $out = elelem -p demo "echo ok && echo two" 2>&1 | Out-String
           Write-Host $out
           if ($LASTEXITCODE -ne 0) { throw "ask failed" }
           if ($out -notmatch 'two') { throw "did not run both commands" }

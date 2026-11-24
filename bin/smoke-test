@@ -78,12 +78,12 @@ fails_cleanly() {
 }
 
 demo_runs() {
-  out=$(timeout 30 "$@" ask -p demo "echo ok" 2>&1 </dev/null) || true
+  out=$(timeout 30 "$@" -p demo "echo ok" 2>&1 </dev/null) || true
   if echo "$out" | grep -q 'exit 0'; then
-    pass "'$1 ask -p demo' runs a command"
+    pass "'$1 -p demo' runs a command"
   else
     echo "$out" | tail -5
-    fail "'$1 ask -p demo' did not run a command"
+    fail "'$1 -p demo' did not run a command"
   fi
 }
 
@@ -95,12 +95,12 @@ falls_back_to_demo() {
     CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID OLLAMA_HOST; do
     unset_detected="$unset_detected -u $name"
   done
-  out=$(env $unset_detected HOME=/tmp/smoke-home timeout 30 elelem-shell ask "echo ok" 2>&1 </dev/null) || true
+  out=$(env $unset_detected HOME=/tmp/smoke-home timeout 30 elelem-shell "echo ok" 2>&1 </dev/null) || true
   if echo "$out" | grep -q 'exit 0' && echo "$out" | grep -q 'using the demo provider'; then
-    pass "'elelem-shell ask' with no key or model falls back to demo"
+    pass "'elelem-shell' with no key or model falls back to demo"
   else
     echo "$out" | tail -5
-    fail "'elelem-shell ask' with no key or model did not fall back to demo"
+    fail "'elelem-shell' with no key or model did not fall back to demo"
   fi
 }
 
@@ -119,10 +119,10 @@ for exe in $exes; do
       demo_runs elelem-shell
       falls_back_to_demo
       for provider in ollama openai anthropic; do
-        fails_cleanly elelem-shell -p "$provider" ask x
+        fails_cleanly elelem-shell -p "$provider" x
       done
       ;;
-    *) fails_cleanly "$exe" ask x ;;
+    *) fails_cleanly "$exe" x ;;
   esac
 done
 

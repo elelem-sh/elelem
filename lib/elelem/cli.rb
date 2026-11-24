@@ -5,15 +5,7 @@ require "optparse"
 
 module Elelem
   class CLI
-    COMMANDS = %w[chat ask help].freeze
-    USAGE = <<~TEXT.freeze
-      Usage: #{File.basename($PROGRAM_NAME)} [command] [options] [args]
-      \nCommands:
-        chat              Interactive REPL (default)
-        ask <prompt>      One-shot query (reads stdin if piped)
-        help              Show this help
-      \nOptions:
-    TEXT
+    USAGE = "Usage: #{File.basename($PROGRAM_NAME)} [options] [prompt]\n\nOptions:".freeze
     private_constant :USAGE
 
     def initialize(args, provider: "demo")
@@ -25,17 +17,13 @@ module Elelem
 
     def run
       Signal.trap("INT") { exit 1 }
-      dispatch(@args.shift || "chat")
+      @args.empty? && $stdin.tty? ? chat : ask
     rescue StandardError, ScriptError => e
       Elelem.logger.warn("cli: #{e.message}\n#{e.backtrace.join("\n")}")
       abort "elelem: #{e.message}"
     end
 
     private
-
-    def dispatch(command)
-      COMMANDS.include?(command) ? send(command) : abort("Unknown command: #{command}")
-    end
 
     def describe_options(parser)
       parser.on("-p", "--provider NAME", "Provider to use (default: #{@provider})") { |p| @provider = p }
@@ -44,18 +32,17 @@ module Elelem
       parser.on("-h", "--help", "Show this help") { puts(parser) || exit }
     end
 
-    def help = puts(@parser)
-
     def chat
       Elelem.start(provider: @provider, provider_options: @provider_options, system_prompt: @system_prompt)
     end
 
     def ask
-      abort "Usage: elelem ask <prompt>" if @args.empty?
+      prompt = prompt_for_ask
+      abort @parser.to_s if prompt.empty?
 
       piped = !$stdout.tty?
-      reply = Elelem.ask(prompt_for_ask, provider: @provider, output: progress_output(piped),
-                                         provider_options: @provider_options, system_prompt: @system_prompt)
+      reply = Elelem.ask(prompt, provider: @provider, output: progress_output(piped),
+                                 provider_options: @provider_options, system_prompt: @system_prompt)
       print_reply(reply, piped: piped)
     end
 
@@ -65,7 +52,8 @@ module Elelem
 
     def prompt_for_ask
       prompt = @args.join(" ")
-      stdin_piped? ? "#{prompt}\n\n```\n#{$stdin.read}\n```" : prompt
+      piped = stdin_piped? ? $stdin.read : ""
+      piped.empty? ? prompt : "#{prompt}\n\n```\n#{piped}\n```"
     end
 
     def stdin_piped? = $stdin.stat.then { |stat| stat.pipe? || stat.file? }
