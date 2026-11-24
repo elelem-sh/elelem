@@ -32,12 +32,24 @@ RSpec.describe "the read tool" do
     end
   end
 
-  it "truncates a large file as execute does" do
+  it "returns the whole of a file up to 64 KB" do
     Dir.mktmpdir do |dir|
       path = File.join(dir, "big.txt")
-      File.write(path, "a" * 20_000)
+      File.write(path, "a" * 65_536)
 
-      expect(session.toolbox.run("read", { "path" => path })[:content]).to include("[10000 characters elided]")
+      expect(session.toolbox.run("read", { "path" => path })[:content]).to eq("a" * 65_536)
+    end
+  end
+
+  it "refuses a file over 64 KB and returns none of it" do
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "huge.txt")
+      File.write(path, "a" * 65_537)
+
+      result = session.toolbox.run("read", { "path" => path })
+      expect(result[:error]).to eq("file is 65537 bytes; too large to read whole. " \
+                                   "Use execute with grep -n or sed -n 'A,Bp'")
+      expect(result[:content]).to be_nil
     end
   end
 end
