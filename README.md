@@ -29,6 +29,10 @@ Start elelem:
 elelem
 ```
 
+`elelem "question"` answers once and reads a pipe. `elelem --sock PATH` serves the
+session on a Unix socket, and `elelem --sock PATH "question"` asks the agent there.
+Connecting gives the powers of a shell, so the socket is open to its owner alone.
+
 ## Tools
 
 elelem ships with `read`, `write` and `execute`. Use the plugin API to add more.

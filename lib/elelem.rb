@@ -18,6 +18,7 @@ require_relative "elelem/null_output"
 require_relative "elelem/terminal"
 require_relative "elelem/input"
 require_relative "elelem/null_input"
+require_relative "elelem/sock"
 require_relative "elelem/builtins"
 require_relative "elelem/system_prompt"
 require_relative "elelem/conversation"
@@ -40,6 +41,12 @@ module Elelem
   def self.build(provider: "demo", **) = Config.build_session(provider, **)
   def self.start(**) = Repl.new(build(**)).run
   def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)
+
+  def self.serve(path, **)
+    sock = Sock.new(path)
+    repl = Repl.new(build(input: SockInput.new(stream: sock), output: Output.new(stream: sock), **))
+    sock.each_client { repl.run }
+  end
 
   def self.state_dir
     File.join(ENV.fetch("XDG_STATE_HOME", File.expand_path("~/.local/state")), "elelem")
