@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.0](https://github.com/elelem-sh/elelem/compare/v0.16.1...v0.17.0) (2026-11-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* infer ask from arguments or piped input and chat from a terminal, and remove the subcommands
+
+### Features
+
+* infer ask from arguments or piped input and chat from a terminal, and remove the subcommands ([ead3d38](https://github.com/elelem-sh/elelem/commit/ead3d381347cc67ab2c994a9972f05e1d13408bf))
+* serve the session on a unix socket with --sock PATH ([b861bd9](https://github.com/elelem-sh/elelem/commit/b861bd93e83569b605a9991e3a63fa0ea812566d))
+
 ## [0.16.1](https://github.com/elelem-sh/elelem/compare/v0.16.0...v0.16.1) (2026-11-21)
 
 
