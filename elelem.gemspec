@@ -8,8 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors = ["mo khan"]
   spec.email = ["mo@mokhan.ca"]
 
-  spec.summary = "A minimal coding harness for LLMs."
-  spec.description = "A minimal coding harness."
+  spec.summary = "A coding agent you can read."
+  spec.description = "A small agent loop in Ruby, with read, write and execute tools. " \
+                     "Plugins add more tools, commands and models."
   spec.homepage = "https://elelem.sh"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 4.0.0"

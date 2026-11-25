@@ -6,6 +6,8 @@ Fast, correct, autonomous - pick two.
 
 Elelem is a minimal coding harness. The agent exposes a simple text-based UI.
 
+Start at `lib/elelem/agent.rb`.
+
 ## Design Principles
 
 * Unix philosophy - simple, composable, minimal.
