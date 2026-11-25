@@ -28,6 +28,14 @@ RSpec.describe Elelem::CLI do
     end
   end
 
+  it "uses the default provider unless told otherwise" do
+    expect do
+      described_class.new(%w[--help])
+    rescue SystemExit
+      nil
+    end.to output(/default: default/).to_stdout
+  end
+
   describe "ask" do
     before do
       Elelem.configure do |config|

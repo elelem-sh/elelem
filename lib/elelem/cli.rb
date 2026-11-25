@@ -8,7 +8,7 @@ module Elelem
     USAGE = "Usage: #{File.basename($PROGRAM_NAME)} [options] [prompt]\n\nOptions:".freeze
     private_constant :USAGE
 
-    def initialize(args, provider: "demo")
+    def initialize(args, provider: "default")
       @provider = provider
       @provider_options = {}
       @parser = OptionParser.new(USAGE) { |o| describe_options(o) }

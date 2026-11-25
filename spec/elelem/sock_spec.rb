@@ -37,7 +37,7 @@ RSpec.describe Elelem::Sock, if: !Gem.win_platform? do
   end
 
   it "serves the session with --sock PATH and asks it with --sock PATH and a prompt" do
-    @server = Thread.new { Elelem::CLI.new(["--sock", @path]).run }
+    @server = Thread.new { Elelem::CLI.new(["-p", "demo", "--sock", @path]).run }
     sleep 0.01 until File.socket?(@path)
 
     expect { Elelem::CLI.new(["--sock", @path, "echo", "hi"]).run }

@@ -75,6 +75,29 @@ RSpec.describe "the demo provider" do
     expect(session.turn("echo hi\n\n```\nexit 1\n```")).to eq("exit 0")
   end
 
+  def default_after(setup)
+    script = "#{setup}; print Elelem::Config.build_provider(:default).class"
+    lib = File.expand_path("../../../lib", __dir__)
+    Dir.mktmpdir do |home|
+      Open3.capture2({ "HOME" => home }, RbConfig.ruby, "-I", lib, "-r", "elelem", "-e", script, chdir: home).first
+    end
+  end
+
+  it "is the default provider" do
+    expect(default_after("")).to eq("Elelem::DemoProvider")
+  end
+
+  it "leaves a default that a gem registered first" do
+    expect(default_after("Elelem.configure { |config| config.provider(:default) { :gem } }")).to eq("Symbol")
+  end
+
+  it "leaves a replaced default on reload" do
+    replace = "Elelem.configure { |config| config.provider(:default) { :gem } }"
+    reload = "Elelem::Config.reload(Elelem::Config.build_session(:demo, output: Elelem::NullOutput.new))"
+
+    expect(default_after("#{reload}; #{replace}; #{reload}")).to eq("Symbol")
+  end
+
   it "reloads without warnings" do
     plugin = File.expand_path("../../../lib/elelem/plugins/demo.rb", __dir__)
 

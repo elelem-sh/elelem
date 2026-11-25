@@ -38,7 +38,7 @@ module Elelem
   LOG_SIZE_LIMIT = 1024 * 1024
   private_constant :OLD_LOGS_KEPT, :LOG_SIZE_LIMIT
 
-  def self.build(provider: "demo", **) = Config.build_session(provider, **)
+  def self.build(provider: "default", **) = Config.build_session(provider, **)
   def self.start(**) = repl(build(**), **).run
   def self.ask(prompt, output: NullOutput.new, **) = build(input: NullInput.new, output:, **).turn(prompt)
 
@@ -48,7 +48,7 @@ module Elelem
     sock.each_client { repl.run }
   end
 
-  def self.repl(session, provider: "demo", provider_options: {}, **)
+  def self.repl(session, provider: "default", provider_options: {}, **)
     Repl.new(session, provider:, model: provider_options[:model])
   end
   private_class_method :repl

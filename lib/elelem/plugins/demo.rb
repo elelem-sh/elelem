@@ -43,4 +43,5 @@ end
 
 Elelem.configure do |config|
   config.provider(:demo) { Elelem::DemoProvider.new }
+  config.provider(:default) { Elelem::DemoProvider.new } unless config.names.include?("default")
 end
