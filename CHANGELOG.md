@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/elelem-sh/elelem/compare/v0.18.0...v0.19.0) (2026-11-25)
+
+
+### Features
+
+* make demo the default provider that a gem or plugin can replace ([7ae4f7e](https://github.com/elelem-sh/elelem/commit/7ae4f7e30c59d93a33120dde22f76eeafb8f676f))
+
 ## [0.18.0](https://github.com/elelem-sh/elelem/compare/v0.17.0...v0.18.0) (2026-11-24)
 
 
